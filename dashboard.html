@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Control - Apresiasi Special</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Mobile Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="https://asset.kompas.com/data/2025/10/10/landing_page/desktop/images/main/logogram-kompascom.svg" alt="KOMPAS.com" class="sidebar-logo">
+                <h2>Dashboard Control</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="control">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Element Control</span>
+                </a>
+                <a href="#" class="nav-item" data-section="queue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Antrian Donasi</span>
+                    <span class="nav-badge" id="queueBadge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-section="live">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                    </svg>
+                    <span>Donasi Tayang</span>
+                </a>
+                <a href="#" class="nav-item" data-section="alertqueue">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                        <path d="M12 6v6l4 2"></path>
+                    </svg>
+                    <span>Queue Alert</span>
+                    <span class="nav-badge" id="alertQueueBadge">0</span>
+                </a>
+                <a href="#" class="nav-item" data-section="donation">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    <span>Test Donasi</span>
+                </a>
+                <a href="#" class="nav-item" data-section="preview">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span>Preview Display</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1>Apresiasi Special - Live Display Control</h1>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="resetAll">Reset All</button>
+                </div>
+            </header>
+
+            <!-- Control Section -->
+            <section class="content-section active" id="controlSection">
+                <div class="section-header">
+                    <h2>Element Visibility Control</h2>
+                    <p>Kontrol tampilan elemen di layar live streaming</p>
+                </div>
+
+                <div class="control-grid">
+                    <!-- Recent Donations Control -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>Apresiasi Terbaru</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toggleRecent">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="card-description">Panel daftar 5 apresiasi terbaru di kanan atas</p>
+                        <div class="card-actions">
+                            <select class="form-select" id="positionRecent">
+                                <option value="top-right">Kanan Atas</option>
+                                <option value="top-left">Kiri Atas</option>
+                                <option value="bottom-right">Kanan Bawah</option>
+                                <option value="bottom-left">Kiri Bawah</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Total Counter Control -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>Total Counter</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toggleCounter">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="card-description">Panel total apresiasi terkumpul di kiri bawah</p>
+                        <div class="card-actions">
+                            <select class="form-select" id="positionCounter">
+                                <option value="bottom-left">Kiri Bawah</option>
+                                <option value="bottom-right">Kanan Bawah</option>
+                                <option value="top-left">Kiri Atas</option>
+                                <option value="top-right">Kanan Atas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- QR Code Control -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>QR Code</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="toggleQR">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="card-description">QR Code untuk scan donasi di kanan bawah</p>
+                        <div class="card-actions">
+                            <select class="form-select" id="positionQR">
+                                <option value="bottom-right">Kanan Bawah</option>
+                                <option value="bottom-left">Kiri Bawah</option>
+                                <option value="top-right">Kanan Atas</option>
+                                <option value="top-left">Kiri Atas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Alert Control -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>Donation Alert</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoAlert">
+                                <span class="toggle-slider">
+                            </label>
+                        </div>
+                        <p class="card-description">Pop-up animasi saat ada donasi baru</p>
+                        
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="alertDuration" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Durasi Tampil (detik)</label>
+                            <input type="number" id="alertDuration" class="form-input" value="8" min="3" max="30" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        
+                        <div class="form-group" style="margin-top: 12px;">
+                            <label for="alertPosition" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Posisi Alert</label>
+                            <select id="alertPosition" class="form-select" style="width: 100%;">
+                                <option value="center">Center (Tengah)</option>
+                                <option value="top">Top (Atas)</option>
+                                <option value="bottom">Bottom (Bawah)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="card-actions" style="margin-top: 15px;">
+                            <button class="btn btn-sm btn-primary" id="testAlert">Test Alert</button>
+                        </div>
+                    </div>
+
+                    <!-- Moderation Control -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>Moderasi Donasi</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableModeration" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="card-description">Tunda tampilan donasi untuk moderasi manual</p>
+                        <div class="card-actions">
+                            <span class="badge success" id="moderationBadge">Moderasi Aktif</span>
+                        </div>
+                    </div>
+
+                    <!-- Auto Approve Control -->
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>Auto Setujui</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableAutoApprove">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="card-description">Otomatis menyetujui donasi setelah waktu tunggu tertentu</p>
+                        
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="autoApproveDelay" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Waktu Tunggu Maksimal (detik)</label>
+                            <input type="number" id="autoApproveDelay" class="form-input" value="30" min="5" max="300" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                            <small style="color: #666; font-size: 12px;">Donasi akan otomatis disetujui setelah waktu ini</small>
+                        </div>
+                        
+                        <div class="card-actions" style="margin-top: 15px;">
+                            <span class="badge" id="autoApproveBadge" style="display: none;">Tidak Aktif</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Queue Section -->
+            <section class="content-section" id="queueSection">
+                <div class="section-header">
+                    <h2>Antrian Donasi Masuk</h2>
+                    <p>Review dan moderasi donasi sebelum ditampilkan di layar</p>
+                </div>
+
+                <!-- Pending Donations Queue -->
+                <div class="pending-queue" id="pendingQueue">
+                    <div class="queue-header">
+                        <h3>📋 Donasi Menunggu Persetujuan</h3>
+                        <div class="queue-header-actions">
+                            <span class="queue-count" id="queueCount">0 menunggu</span>
+                            <button class="btn btn-sm btn-success" id="approveAll" style="display: none;">
+                                ✓ Setujui Semua
+                            </button>
+                        </div>
+                    </div>
+                    <div class="queue-list" id="queueList">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <p>Belum ada donasi yang masuk</p>
+                            <small>Donasi baru akan muncul di sini untuk direview</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Live Donations Section -->
+            <section class="content-section" id="liveSection">
+                <div class="section-header">
+                    <h2>Donasi Sedang Tayang</h2>
+                    <p>Daftar donasi yang sedang ditampilkan di layar live streaming</p>
+                </div>
+
+                <div class="live-donations">
+                    <div class="live-header">
+                        <div class="live-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Donasi Tayang</span>
+                                <span class="stat-value" id="liveDonationCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Total Terkumpul</span>
+                                <span class="stat-value" id="liveTotalAmount">Rp 0</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-danger" id="clearAllLive" style="display: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Hapus Semua
+                        </button>
+                    </div>
+                    
+                    <div class="live-list" id="liveList">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
+                                <polyline points="17 2 12 7 7 2"></polyline>
+                            </svg>
+                            <p>Belum ada donasi yang tayang</p>
+                            <small>Donasi yang disetujui akan muncul di sini</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alert Queue Section -->
+            <section class="content-section" id="alertqueueSection">
+                <div class="section-header">
+                    <h2>Queue Alert Popup</h2>
+                    <p>Daftar alert yang sedang dalam antrian untuk ditampilkan</p>
+                </div>
+
+                <div class="alert-queue">
+                    <div class="alert-queue-header">
+                        <div class="queue-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Sedang Ditampilkan</span>
+                                <span class="stat-value" id="currentAlertStatus">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Dalam Antrian</span>
+                                <span class="stat-value" id="alertQueueCount">0</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-danger" id="clearAlertQueue" style="display: none;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Bersihkan Queue
+                        </button>
+                    </div>
+                    
+                    <div class="alert-queue-list" id="alertQueueList">
+                        <div class="empty-state">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <p>Tidak ada alert dalam antrian</p>
+                            <small>Alert akan muncul di sini saat menunggu ditampilkan</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Test Donation Section -->
+            <section class="content-section" id="donationSection">
+                <div class="section-header">
+                    <h2>Test Donasi Manual</h2>
+                    <p>Kirim donasi test untuk mencoba tampilan di layar live streaming</p>
+                </div>
+                <div class="test-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nama Donatur</label>
+                            <input type="text" id="testName" class="form-control" placeholder="Masukkan nama" value="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Donasi</label>
+                            <input type="number" id="testAmount" class="form-control" placeholder="50000" value="50000">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pesan (Opsional)</label>
+                        <textarea id="testMessage" class="form-control" rows="3" placeholder="Masukkan pesan dukungan...">Semangat terus untuk jurnalisme berkualitas! 🎉</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="testHideName">
+                            <span>Sembunyikan nama (Tampilkan sebagai Anonim)</span>
+                        </label>
+                    </div>
+                    <button class="btn btn-primary btn-lg" id="sendTestDonation">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                        Kirim Test Donasi
+                    </button>
+                </div>
+
+                <div class="quick-test">
+                    <h3>Quick Test</h3>
+                    <div class="quick-buttons">
+                        <button class="btn btn-outline" data-amount="5000">Rp 5.000</button>
+                        <button class="btn btn-outline" data-amount="10000">Rp 10.000</button>
+                        <button class="btn btn-outline" data-amount="50000">Rp 50.000</button>
+                        <button class="btn btn-outline" data-amount="100000">Rp 100.000</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preview Section -->
+            <section class="content-section" id="previewSection">
+                <div class="section-header">
+                    <h2>Preview Display</h2>
+                    <p>Preview tampilan live streaming dalam iframe</p>
+                </div>
+
+                <div class="preview-container">
+                    <div class="preview-controls">
+                        <button class="btn btn-sm btn-outline" id="refreshPreview">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            Refresh
+                        </button>
+                        <button class="btn btn-sm btn-primary" id="openNewWindow">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            Buka di Window Baru
+                        </button>
+                    </div>
+                    <iframe id="displayPreview" src="display.html"></iframe>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

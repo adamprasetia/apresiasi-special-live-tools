@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apresiasi Special - Kompas.com</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-container">
+                <div class="logo">
+                    <img src="https://asset.kompas.com/data/2025/10/10/landing_page/desktop/images/main/logogram-kompascom.svg" alt="KOMPAS.com" class="logo-icon">
+                </div>
+                <div class="header-actions">
+                    <a href="https://www.kompas.com" class="header-link">Kompas.com</a>
+                    <button class="user-icon" aria-label="User Account">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="appreciation-card">
+                <div class="card-header">
+                    <h2>Apresiasi Special</h2>
+                    <p class="subtitle">Dukung jurnalisme berkualitas dengan donasi Anda</p>
+                </div>
+
+                <form class="donation-form" id="donationForm">
+                    <!-- Pilihan Nominal -->
+                    <div class="form-group">
+                        <label class="form-label">Pilih Nominal Donasi</label>
+                        <div class="amount-options">
+                            <button type="button" class="amount-btn" data-amount="5000">
+                                <span class="currency">Rp</span>
+                                <span class="value">5.000</span>
+                            </button>
+                            <button type="button" class="amount-btn" data-amount="10000">
+                                <span class="currency">Rp</span>
+                                <span class="value">10.000</span>
+                            </button>
+                            <button type="button" class="amount-btn" data-amount="20000">
+                                <span class="currency">Rp</span>
+                                <span class="value">20.000</span>
+                            </button>
+                            <button type="button" class="amount-btn" data-amount="50000">
+                                <span class="currency">Rp</span>
+                                <span class="value">50.000</span>
+                            </button>
+                            <button type="button" class="amount-btn" data-amount="100000">
+                                <span class="currency">Rp</span>
+                                <span class="value">100.000</span>
+                            </button>
+                            <button type="button" class="amount-btn" data-amount="250000">
+                                <span class="currency">Rp</span>
+                                <span class="value">250.000</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input Custom Nominal -->
+                    <div class="form-group">
+                        <label for="customAmount" class="form-label">Atau Masukkan Nominal Lainnya</label>
+                        <div class="input-wrapper">
+                            <span class="input-prefix">Rp</span>
+                            <input 
+                                type="text" 
+                                id="customAmount" 
+                                class="form-input" 
+                                placeholder="0"
+                                inputmode="numeric"
+                            >
+                        </div>
+                        <span class="helper-text">Minimal donasi Rp 5.000</span>
+                    </div>
+
+                    <!-- Nama -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">Nama Lengkap <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            class="form-input" 
+                            placeholder="Masukkan nama lengkap"
+                            required
+                        >
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email <span class="required">*</span></label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="form-input" 
+                            placeholder="nama@email.com"
+                            required
+                        >
+                    </div>
+
+                    <!-- Pesan -->
+                    <div class="form-group">
+                        <label for="message" class="form-label">Pesan <span class="optional">(Opsional)</span></label>
+                        <textarea 
+                            id="message" 
+                            class="form-textarea" 
+                            placeholder="Tulis pesan dukungan Anda..."
+                            rows="4"
+                            maxlength="500"
+                        ></textarea>
+                        <span class="helper-text" id="charCount">0/500 karakter</span>
+                    </div>
+
+                    <!-- Hide Name Checkbox -->
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="hideNameCheckbox" class="hide-name-checkbox">
+                            <span class="checkbox-text">Sembunyikan nama saya dari publik</span>
+                        </label>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="donation-summary">
+                        <div class="summary-row">
+                            <span class="summary-label">Total Donasi</span>
+                            <span class="summary-value" id="totalAmount">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="form-group terms-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="termsCheckbox" class="terms-checkbox">
+                            <span class="checkbox-text">
+                                Saya telah membaca dan menyetujui 
+                                <button type="button" class="link-btn" id="openTermsModal">Syarat dan Ketentuan</button>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                        Lanjutkan Pembayaran
+                    </button>
+                </form>
+
+                <div class="info-text">
+                    <p>Dengan melakukan donasi, Anda turut mendukung jurnalisme independen dan berkualitas di Indonesia.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Terms and Conditions Modal -->
+        <div id="termsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Syarat dan Ketentuan</h3>
+                    <button type="button" class="close-modal" id="closeModal">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h4>1. Ketentuan Umum</h4>
+                    <p>Dengan melakukan donasi melalui halaman ini, Anda menyetujui untuk memberikan dukungan finansial kepada KOMPAS.com untuk mendukung jurnalisme berkualitas dan independen.</p>
+                    
+                    <h4>2. Nominal Donasi</h4>
+                    <p>Minimal donasi yang dapat diberikan adalah Rp 5.000. Anda dapat memilih nominal yang telah disediakan atau memasukkan nominal sesuai keinginan Anda.</p>
+                    
+                    <h4>3. Proses Pembayaran</h4>
+                    <p>Setelah mengklik tombol "Lanjutkan Pembayaran", Anda akan diarahkan ke halaman pembayaran untuk menyelesaikan transaksi donasi.</p>
+                    
+                    <h4>4. Kebijakan Pengembalian Dana</h4>
+                    <p>Donasi yang telah diberikan bersifat final dan tidak dapat dikembalikan. Pastikan Anda telah mengisi informasi dengan benar sebelum melanjutkan pembayaran.</p>
+                    
+                    <h4>5. Penggunaan Data Pribadi</h4>
+                    <p>Data pribadi yang Anda berikan (nama dan email) akan digunakan untuk keperluan konfirmasi donasi dan komunikasi terkait program apresiasi. Kami berkomitmen untuk menjaga kerahasiaan data Anda sesuai dengan kebijakan privasi yang berlaku.</p>
+                    
+                    <h4>6. Konfirmasi Donasi</h4>
+                    <p>Konfirmasi donasi akan dikirimkan ke alamat email yang Anda daftarkan setelah pembayaran berhasil diproses.</p>
+                    
+                    <h4>7. Perubahan Syarat dan Ketentuan</h4>
+                    <p>KOMPAS.com berhak untuk mengubah syarat dan ketentuan ini sewaktu-waktu tanpa pemberitahuan terlebih dahulu.</p>
+                    
+                    <h4>8. Kontak</h4>
+                    <p>Jika Anda memiliki pertanyaan terkait donasi, silakan hubungi kami melalui halaman Contact Us di website KOMPAS.com.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-accept" id="acceptTerms">Saya Mengerti dan Menyetujui</button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-top">
+                    <div class="footer-section">
+                        <img src="https://asset.kompas.com/data/2023/11/30/kompascom/desktop/images/logo-kompascom-small.png" alt="KOMPAS.com" class="footer-logo">
+                        <p class="footer-description">Berita terkini yang jernih dan terpercaya</p>
+                        <div class="footer-social">
+                            <a href="https://www.facebook.com/kompascom" aria-label="Facebook" target="_blank">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                                </svg>
+                            </a>
+                            <a href="https://twitter.com/kompascom" aria-label="Twitter" target="_blank">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                            </a>
+                            <a href="https://instagram.com/kompascom" aria-label="Instagram" target="_blank">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                </svg>
+                            </a>
+                            <a href="https://www.youtube.com/c/mykompascom" aria-label="YouTube" target="_blank">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <div class="footer-column">
+                            <h4>Layanan</h4>
+                            <a href="https://inside.kompas.com/about-us">About Us</a>
+                            <a href="https://inside.kompas.com/term-of-use">Ketentuan Penggunaan</a>
+                            <a href="https://www.kgmedia.id/legal-privacy-id">Kebijakan Privasi</a>
+                            <a href="https://inside.kompas.com/about-us#meet">Contact Us</a>
+                        </div>
+                        <div class="footer-column">
+                            <h4>Kanal</h4>
+                            <a href="https://news.kompas.com">News</a>
+                            <a href="https://bola.kompas.com">Bola</a>
+                            <a href="https://entertainment.kompas.com">Entertainment</a>
+                            <a href="https://tekno.kompas.com">Tekno</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2008 - 2025 PT. Kompas Cyber Media (Kompas Gramedia Digital Group). All Rights Reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

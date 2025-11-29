@@ -1,0 +1,545 @@
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #005AA9;
+    --primary-dark: #003d75;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --white: #ffffff;
+    --green-screen: #00ff00;
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Helvetica Neue', sans-serif;
+    background-color: var(--green-screen);
+    overflow: hidden;
+    width: 1920px;
+    height: 1080px;
+}
+
+.display-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* Donation Alert - Pop-up Animation */
+.donation-alert {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-radius: 24px;
+    padding: 40px 60px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    max-width: 800px;
+    min-width: 600px;
+}
+
+/* Alert Position Variants */
+.donation-alert.alert-center {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+}
+
+.donation-alert.alert-center.show {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.donation-alert.alert-top {
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -100%) scale(0);
+}
+
+.donation-alert.alert-top.show {
+    transform: translate(-50%, 0) scale(1);
+}
+
+.donation-alert.alert-bottom {
+    top: auto;
+    bottom: 10%;
+    left: 50%;
+    transform: translate(-50%, 100%) scale(0);
+}
+
+.donation-alert.alert-bottom.show {
+    transform: translate(-50%, 0) scale(1);
+}
+
+.donation-alert.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.donation-alert.hide {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+}
+
+.alert-content {
+    color: var(--white);
+    text-align: center;
+}
+
+.alert-header {
+    margin-bottom: 30px;
+}
+
+.alert-logo {
+    height: 40px;
+    margin-bottom: 20px;
+}
+
+.alert-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.alert-body {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.donor-info {
+    margin-bottom: 20px;
+}
+
+.donor-name {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.donation-amount {
+    font-size: 48px;
+    font-weight: 800;
+    color: #FFD700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.donor-message {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.donor-message p {
+    font-size: 24px;
+    font-style: italic;
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Recent Donations List */
+.recent-donations {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
+    width: 400px;
+    max-height: 600px;
+    display: none;
+    transform: translateX(100px);
+    transition: all 0.5s ease;
+}
+
+.recent-donations.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(0);
+    animation: slideInRight 0.5s ease;
+}
+
+.recent-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.recent-logo {
+    height: 28px;
+}
+
+.recent-header h3 {
+    color: var(--primary-color);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.donations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.donations-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.donations-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.donations-list::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 10px;
+}
+
+.donation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    animation: slideIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.donation-item:hover {
+    background: #e9ecef;
+    transform: translateX(-5px);
+}
+
+.item-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.item-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.item-amount {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Total Counter */
+.total-counter {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px 32px;
+    box-shadow: var(--shadow-lg);
+    min-width: 350px;
+    display: none;
+    transform: translateY(100px);
+    transition: all 0.5s ease;
+}
+
+.total-counter.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    animation: slideInUp 0.5s ease;
+}
+
+.counter-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.counter-logo {
+    height: 50px;
+}
+
+.counter-info {
+    flex: 1;
+}
+
+.counter-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.counter-amount {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.counter-donors {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* QR Code Section */
+.qr-section {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
+    display: none;
+    transform: translateY(100px);
+    transition: all 0.5s ease;
+}
+
+.qr-section.show {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+    animation: slideInUp 0.5s ease;
+}
+
+.qr-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.qr-code {
+    width: 120px;
+    height: 120px;
+    background: var(--white);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-code canvas,
+.qr-code img {
+    border-radius: 8px;
+}
+
+.qr-text {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.qr-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.qr-url {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.donation-alert.show .donation-amount {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* Position Classes for Dynamic Positioning */
+/* Recent Donations */
+.recent-donations.top-right {
+    top: 30px;
+    right: 30px;
+    bottom: auto;
+    left: auto;
+}
+
+.recent-donations.top-left {
+    top: 30px;
+    left: 30px;
+    bottom: auto;
+    right: auto;
+}
+
+.recent-donations.bottom-right {
+    bottom: 30px;
+    right: 30px;
+    top: auto;
+    left: auto;
+}
+
+.recent-donations.bottom-left {
+    bottom: 30px;
+    left: 30px;
+    top: auto;
+    right: auto;
+}
+
+/* Total Counter */
+.total-counter.top-right {
+    top: 30px;
+    right: 30px;
+    bottom: auto;
+    left: auto;
+}
+
+.total-counter.top-left {
+    top: 30px;
+    left: 30px;
+    bottom: auto;
+    right: auto;
+}
+
+.total-counter.bottom-right {
+    bottom: 30px;
+    right: 30px;
+    top: auto;
+    left: auto;
+}
+
+.total-counter.bottom-left {
+    bottom: 30px;
+    left: 30px;
+    top: auto;
+    right: auto;
+}
+
+/* QR Section */
+.qr-section.top-right {
+    top: 30px;
+    right: 30px;
+    bottom: auto;
+    left: auto;
+}
+
+.qr-section.top-left {
+    top: 30px;
+    left: 30px;
+    bottom: auto;
+    right: auto;
+}
+
+.qr-section.bottom-right {
+    bottom: 30px;
+    right: 30px;
+    top: auto;
+    left: auto;
+}
+
+.qr-section.bottom-left {
+    bottom: 30px;
+    left: 30px;
+    top: auto;
+    right: auto;
+}
+
+/* Responsive adjustments for different streaming resolutions */
+@media (max-width: 1280px) {
+    body {
+        width: 1280px;
+        height: 720px;
+    }
+    
+    .donation-alert {
+        min-width: 400px;
+        padding: 30px 40px;
+    }
+    
+    .alert-title {
+        font-size: 24px;
+    }
+    
+    .donor-name {
+        font-size: 28px;
+    }
+    
+    .donation-amount {
+        font-size: 36px;
+    }
+    
+    .donor-message p {
+        font-size: 18px;
+    }
+    
+    .recent-donations {
+        width: 320px;
+        top: 20px;
+        right: 20px;
+    }
+    
+    .total-counter {
+        min-width: 280px;
+        bottom: 20px;
+        left: 20px;
+    }
+    
+    .counter-amount {
+        font-size: 24px;
+    }
+    
+    .qr-section {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .qr-code {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .qr-title {
+        font-size: 16px;
+    }
+}

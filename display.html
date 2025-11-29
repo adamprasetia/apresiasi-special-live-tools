@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Donasi - Live Streaming</title>
+    <link rel="stylesheet" href="display.css">
+</head>
+<body>
+    <div class="display-container">
+        <!-- Donation Alert -->
+        <div class="donation-alert" id="donationAlert">
+            <div class="alert-content">
+                <div class="alert-header">
+                    <img src="https://asset.kompas.com/data/2025/10/10/landing_page/desktop/images/main/logo-kompascom-white.svg" alt="KOMPAS.com" class="alert-logo">
+                    <h2 class="alert-title">Terima Kasih atas Apresiasi Anda!</h2>
+                </div>
+                <div class="alert-body">
+                    <div class="donor-info">
+                        <p class="donor-name" id="donorName">John Doe</p>
+                        <p class="donation-amount" id="donationAmount">Rp 50.000</p>
+                    </div>
+                    <div class="donor-message" id="donorMessage">
+                        <p>Semangat terus untuk jurnalisme berkualitas! 🎉</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Donations List -->
+        <div class="recent-donations" id="recentDonations">
+            <div class="recent-header">
+                <img src="https://asset.kompas.com/data/2025/10/10/landing_page/desktop/images/main/logo-kompascom-app.svg" alt="KOMPAS.com" class="recent-logo">
+                <h3>Apresiasi Terbaru</h3>
+            </div>
+            <div class="donations-list" id="donationsList">
+                <!-- Donations will appear here -->
+            </div>
+        </div>
+
+        <!-- Total Donation Counter -->
+        <div class="total-counter" id="totalCounter">
+            <div class="counter-content">
+                <img src="https://asset.kompas.com/data/2025/10/10/landing_page/desktop/images/main/logo-kompascom.svg" alt="KOMPAS.com" class="counter-logo">
+                <div class="counter-info">
+                    <p class="counter-label">Total Apresiasi Special Terkumpul</p>
+                    <p class="counter-amount" id="totalAmount">Rp 0</p>
+                    <p class="counter-donors" id="totalDonors">0 Donatur</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="qr-section" id="qrSection">
+            <div class="qr-content">
+                <div class="qr-code" id="qrCode"></div>
+                <div class="qr-text">
+                    <p class="qr-title">Scan untuk Berapresiasi</p>
+                    <p class="qr-url">apresiasi.kompas.com</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="display.js"></script>
+</body>
+</html>
