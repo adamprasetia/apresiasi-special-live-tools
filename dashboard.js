@@ -14,6 +14,9 @@ const moderationBadge = document.getElementById('moderationBadge');
 const enableAutoApprove = document.getElementById('enableAutoApprove');
 const autoApproveDelay = document.getElementById('autoApproveDelay');
 const autoApproveBadge = document.getElementById('autoApproveBadge');
+const enableAutoApproveQueue = document.getElementById('enableAutoApproveQueue');
+const autoApproveDelayQueue = document.getElementById('autoApproveDelayQueue');
+const autoApproveBadgeQueue = document.getElementById('autoApproveBadgeQueue');
 let autoApproveEnabled = false;
 let autoApproveMaxWait = 30; // default 30 seconds
 let autoApproveTimers = {}; // Store timers for each donation ID
@@ -128,62 +131,72 @@ function updateQueueDisplay() {
         pendingQueue.classList.add('has-items');
         approveAllBtn.style.display = 'inline-flex';
         
-        queueList.innerHTML = '';
+        // Check if list needs full re-render (count changed or first render)
+        const currentItemCount = queueList.querySelectorAll('.queue-item').length;
+        const needsFullRender = currentItemCount !== count;
         
-        pendingDonations.forEach((donation, index) => {
-            const item = document.createElement('div');
-            item.className = 'queue-item';
+        if (needsFullRender) {
+            queueList.innerHTML = '';
             
-            // Calculate countdown if auto-approve is enabled
-            let countdownHtml = '';
-            if (autoApproveEnabled) {
-                const timeRemaining = getTimeRemaining(donation.receivedAt);
-                if (timeRemaining > 0) {
-                    const minutes = Math.floor(timeRemaining / 60);
-                    const seconds = timeRemaining % 60;
-                    const timeText = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
-                    countdownHtml = `<div class="queue-item-countdown" style="color: #ff9800; font-size: 12px; margin-top: 5px;">⏱️ Auto setujui dalam ${timeText}</div>`;
-                } else {
-                    countdownHtml = `<div class="queue-item-countdown" style="color: #dc3545; font-size: 12px; margin-top: 5px;">⏱️ Sedang diproses...</div>`;
+            pendingDonations.forEach((donation, index) => {
+                const item = document.createElement('div');
+                item.className = 'queue-item';
+                item.dataset.donationId = donation.id;
+                
+                // Calculate countdown if auto-approve is enabled
+                let countdownHtml = '';
+                if (autoApproveEnabled) {
+                    const timeRemaining = getTimeRemaining(donation);
+                    if (timeRemaining > 0) {
+                        const minutes = Math.floor(timeRemaining / 60);
+                        const seconds = timeRemaining % 60;
+                        const timeText = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+                        countdownHtml = `<div class="queue-item-countdown" data-donation-id="${donation.id}" style="color: #ff9800; font-size: 12px; margin-top: 5px;">⏱️ Auto setujui dalam ${timeText}</div>`;
+                    } else {
+                        countdownHtml = `<div class="queue-item-countdown" data-donation-id="${donation.id}" style="color: #dc3545; font-size: 12px; margin-top: 5px;">⏱️ Sedang diproses...</div>`;
+                    }
                 }
-            }
-            
-            item.innerHTML = `
-                <div class="queue-item-info">
-                    <div class="queue-item-meta">
-                        <span class="queue-item-name">${donation.displayName}</span>
-                        <span class="queue-item-time">${donation.timestamp}</span>
+                
+                item.innerHTML = `
+                    <div class="queue-item-info">
+                        <div class="queue-item-meta">
+                            <span class="queue-item-name">${donation.displayName}</span>
+                            <span class="queue-item-time">${donation.timestamp}</span>
+                        </div>
+                        <div class="queue-item-amount">${formatRupiah(donation.amount)}</div>
+                        ${donation.message ? `<div class="queue-item-message">💬 "${donation.message}"</div>` : '<div class="queue-item-message" style="opacity: 0.5;">Tidak ada pesan</div>'}
+                        ${countdownHtml}
                     </div>
-                    <div class="queue-item-amount">${formatRupiah(donation.amount)}</div>
-                    ${donation.message ? `<div class="queue-item-message">💬 "${donation.message}"</div>` : '<div class="queue-item-message" style="opacity: 0.5;">Tidak ada pesan</div>'}
-                    ${countdownHtml}
-                </div>
-                <div class="queue-item-actions">
-                    <button class="btn btn-sm btn-approve" data-index="${index}">
-                        ✓ Setujui
-                    </button>
-                    <button class="btn btn-sm btn-reject" data-index="${index}">
-                        ✕ Tolak
-                    </button>
-                </div>
-            `;
-            queueList.appendChild(item);
-        });
-        
-        // Add event listeners to approve/reject buttons
-        document.querySelectorAll('.btn-approve').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const index = parseInt(btn.dataset.index);
-                approveDonation(index);
+                    <div class="queue-item-actions">
+                        <button class="btn btn-sm btn-approve" data-index="${index}">
+                            ✓ Setujui
+                        </button>
+                        <button class="btn btn-sm btn-reject" data-index="${index}">
+                            ✕ Tolak
+                        </button>
+                    </div>
+                `;
+                queueList.appendChild(item);
             });
-        });
-        
-        document.querySelectorAll('.btn-reject').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const index = parseInt(btn.dataset.index);
-                rejectDonation(index);
+            
+            // Add event listeners to approve/reject buttons
+            document.querySelectorAll('.btn-approve').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.dataset.index);
+                    approveDonation(index);
+                });
             });
-        });
+            
+            document.querySelectorAll('.btn-reject').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.dataset.index);
+                    rejectDonation(index);
+                });
+            });
+        } else {
+            // Only update countdown timers without re-rendering
+            updateCountdownTimers();
+        }
     } else {
         pendingQueue.classList.remove('has-items');
         approveAllBtn.style.display = 'none';
@@ -200,6 +213,28 @@ function updateQueueDisplay() {
     }
 }
 
+// Update only countdown timers (no re-render)
+function updateCountdownTimers() {
+    if (!autoApproveEnabled) return;
+    
+    pendingDonations.forEach(donation => {
+        const countdownElement = document.querySelector(`.queue-item-countdown[data-donation-id="${donation.id}"]`);
+        if (!countdownElement) return;
+        
+        const timeRemaining = getTimeRemaining(donation);
+        if (timeRemaining > 0) {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            const timeText = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+            countdownElement.textContent = `⏱️ Auto setujui dalam ${timeText}`;
+            countdownElement.style.color = '#ff9800';
+        } else {
+            countdownElement.textContent = '⏱️ Sedang diproses...';
+            countdownElement.style.color = '#dc3545';
+        }
+    });
+}
+
 // Add donation to queue
 function addToQueue(donation) {
     const now = new Date();
@@ -210,10 +245,12 @@ function addToQueue(donation) {
         ...donation,
         displayName: donation.hideName ? 'Anonim' : donation.name,
         timestamp: timestamp,
-        receivedAt: Date.now() // Store as milliseconds for timer calculation
+        receivedAt: Date.now(), // When donation entered queue
+        autoApproveStartTime: autoApproveEnabled ? Date.now() : null // When auto-approve timer started
     };
     
-    pendingDonations.unshift(queueItem);
+    // Add to end of queue (older donations first, FIFO)
+    pendingDonations.push(queueItem);
     
     // Start auto-approve timer if enabled
     if (autoApproveEnabled) {
@@ -227,19 +264,19 @@ function addToQueue(donation) {
 }
 
 // Approve donation
-function approveDonation(donationIdOrIndex) {
-    // Support both ID and index for backwards compatibility
+function approveDonation(donationIdOrIndex, isIdMode = false) {
     let index, donation;
     
-    if (typeof donationIdOrIndex === 'number' && donationIdOrIndex < pendingDonations.length) {
-        // It's an index
-        index = donationIdOrIndex;
-        donation = pendingDonations[index];
-    } else {
-        // It's an ID
+    if (isIdMode) {
+        // It's definitely an ID (from auto-approve)
         index = pendingDonations.findIndex(d => d.id === donationIdOrIndex);
         if (index === -1) return; // Donation not found
         donation = pendingDonations[index];
+    } else {
+        // It's an index (from manual button click)
+        index = donationIdOrIndex;
+        donation = pendingDonations[index];
+        if (!donation) return; // Invalid index
     }
     
     // Clear auto-approve timer if exists
@@ -364,21 +401,41 @@ enableModeration.addEventListener('change', (e) => {
     }
 });
 
-// Auto Approve Toggle
-enableAutoApprove.addEventListener('change', (e) => {
-    autoApproveEnabled = e.target.checked;
+// Function to sync auto-approve state across both toggles
+function syncAutoApproveState(enabled) {
+    autoApproveEnabled = enabled;
     
-    if (autoApproveEnabled) {
+    // Sync both toggles
+    enableAutoApprove.checked = enabled;
+    enableAutoApproveQueue.checked = enabled;
+    
+    // Sync both badges
+    if (enabled) {
         autoApproveBadge.textContent = 'Auto Setujui Aktif';
         autoApproveBadge.classList.add('success');
         autoApproveBadge.style.display = 'inline-block';
         
-        // Start timers for existing pending donations
+        autoApproveBadgeQueue.textContent = 'Auto Setujui Aktif';
+        autoApproveBadgeQueue.classList.add('success');
+        autoApproveBadgeQueue.style.display = 'inline-block';
+        
+        // Set autoApproveStartTime for existing donations and start timers
+        const now = Date.now();
         pendingDonations.forEach(donation => {
+            // Set start time to now (when toggle activated) if not already set
+            if (!donation.autoApproveStartTime) {
+                donation.autoApproveStartTime = now;
+            }
+            
             if (!autoApproveTimers[donation.id]) {
                 startAutoApproveTimer(donation);
             }
         });
+        
+        // Force full re-render to show countdown timers
+        if (pendingDonations.length > 0) {
+            queueList.innerHTML = '';
+        }
         
         showNotification('Auto approve diaktifkan', 'success');
     } else {
@@ -386,23 +443,35 @@ enableAutoApprove.addEventListener('change', (e) => {
         autoApproveBadge.classList.remove('success');
         autoApproveBadge.style.display = 'none';
         
+        autoApproveBadgeQueue.textContent = 'Tidak Aktif';
+        autoApproveBadgeQueue.classList.remove('success');
+        autoApproveBadgeQueue.style.display = 'none';
+        
         // Clear all existing timers
         Object.keys(autoApproveTimers).forEach(id => {
             clearTimeout(autoApproveTimers[id]);
             delete autoApproveTimers[id];
         });
         
+        // Force full re-render to hide countdown timers
+        if (pendingDonations.length > 0) {
+            queueList.innerHTML = '';
+        }
+        
         showNotification('Auto approve dinonaktifkan', 'info');
     }
     
     updateQueueDisplay();
-});
+}
 
-// Auto Approve Delay Change
-autoApproveDelay.addEventListener('change', (e) => {
-    autoApproveMaxWait = parseInt(e.target.value) || 30;
+// Function to sync auto-approve delay across both inputs
+function syncAutoApproveDelay(delay) {
+    autoApproveMaxWait = delay;
     
-    // Restart timers with new delay if auto-approve is enabled
+    // Sync both inputs
+    autoApproveDelay.value = delay;
+    autoApproveDelayQueue.value = delay;
+    
     if (autoApproveEnabled) {
         // Clear existing timers
         Object.keys(autoApproveTimers).forEach(id => {
@@ -415,36 +484,65 @@ autoApproveDelay.addEventListener('change', (e) => {
             startAutoApproveTimer(donation);
         });
         
+        // Update countdown display immediately
+        updateCountdownTimers();
+        
         showNotification(`Waktu tunggu diubah menjadi ${autoApproveMaxWait} detik`, 'info');
     }
+}
+
+// Auto Approve Toggle (Element Control)
+enableAutoApprove.addEventListener('change', (e) => {
+    syncAutoApproveState(e.target.checked);
+});
+
+// Auto Approve Toggle (Queue Page)
+enableAutoApproveQueue.addEventListener('change', (e) => {
+    syncAutoApproveState(e.target.checked);
+});
+
+// Auto Approve Delay Change (Element Control)
+autoApproveDelay.addEventListener('change', (e) => {
+    const delay = parseInt(e.target.value) || 30;
+    syncAutoApproveDelay(delay);
+});
+
+// Auto Approve Delay Change (Queue Page)
+autoApproveDelayQueue.addEventListener('change', (e) => {
+    const delay = parseInt(e.target.value) || 30;
+    syncAutoApproveDelay(delay);
 });
 
 // Start auto-approve timer for a donation
 function startAutoApproveTimer(donation) {
     if (!autoApproveEnabled) return;
     
-    const timeElapsed = Math.floor((Date.now() - donation.receivedAt) / 1000);
+    // Use autoApproveStartTime if set, otherwise use receivedAt
+    const startTime = donation.autoApproveStartTime || donation.receivedAt;
+    const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
     const timeRemaining = autoApproveMaxWait - timeElapsed;
     
     if (timeRemaining <= 0) {
         // Time already expired, approve immediately
-        approveDonation(donation.id);
+        approveDonation(donation.id, true);
         return;
     }
     
     // Set timer for remaining time
     autoApproveTimers[donation.id] = setTimeout(() => {
-        approveDonation(donation.id);
+        approveDonation(donation.id, true);
         delete autoApproveTimers[donation.id];
         showNotification(`✓ Donasi dari ${donation.displayName} disetujui otomatis`, 'success');
     }, timeRemaining * 1000);
 }
 
 // Get time remaining for auto-approve
-function getTimeRemaining(timestamp) {
+function getTimeRemaining(donation) {
     if (!autoApproveEnabled) return null;
     
-    const timeElapsed = Math.floor((Date.now() - timestamp) / 1000);
+    // Use autoApproveStartTime if set, otherwise use receivedAt
+    const startTime = donation.autoApproveStartTime || donation.receivedAt;
+    const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
     const timeRemaining = autoApproveMaxWait - timeElapsed;
     
     return Math.max(0, timeRemaining);
@@ -813,7 +911,7 @@ setInterval(() => {
 // Update countdown timers every second
 setInterval(() => {
     if (autoApproveEnabled && pendingDonations.length > 0) {
-        updateQueueDisplay();
+        updateCountdownTimers();
     }
 }, 1000);
 

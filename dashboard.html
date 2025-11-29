@@ -227,6 +227,29 @@
                     <p>Review dan moderasi donasi sebelum ditampilkan di layar</p>
                 </div>
 
+                <!-- Auto Approve Settings -->
+                <div class="control-grid" style="margin-bottom: 20px;">
+                    <div class="control-card">
+                        <div class="card-header">
+                            <h3>⚙️ Auto Setujui</h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="enableAutoApproveQueue">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <p class="card-description">Otomatis menyetujui donasi setelah waktu tunggu tertentu</p>
+                        
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="autoApproveDelayQueue" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Waktu Tunggu Maksimal (detik)</label>
+                            <input type="number" id="autoApproveDelayQueue" class="form-input" value="30" min="5" max="300" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        
+                        <div class="card-actions" style="margin-top: 15px;">
+                            <span class="badge" id="autoApproveBadgeQueue" style="display: none;">Tidak Aktif</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Pending Donations Queue -->
                 <div class="pending-queue" id="pendingQueue">
                     <div class="queue-header">
