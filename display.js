@@ -241,9 +241,106 @@ let demoIndex = 0;
     demoIndex++;
 }, 15000); */
 
-// Listen for messages from parent window (for real integration)
-window.addEventListener('message', (event) => {
-    const data = event.data;
+// BroadcastChannel for cross-tab/window communication
+const displayChannel = new BroadcastChannel('apresiasi_display_channel');
+
+// LocalStorage polling for cross-browser communication
+const STORAGE_KEY = 'apresiasi_display_command';
+const STORAGE_TIMESTAMP_KEY = 'apresiasi_display_timestamp';
+let lastProcessedTimestamp = 0;
+
+// WebSocket connection for cross-browser/incognito communication
+let ws = null;
+let wsReconnectTimer = null;
+
+function connectWebSocket() {
+    try {
+        ws = new WebSocket('ws://localhost:8765');
+        
+        ws.onopen = () => {
+            console.log('✅ Display connected to relay server');
+            // Identify as display
+            ws.send(JSON.stringify({ clientType: 'display' }));
+        };
+        
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                handleDisplayCommand(data);
+            } catch (e) {
+                console.error('Failed to parse WebSocket message:', e);
+            }
+        };
+        
+        ws.onerror = (error) => {
+            console.warn('WebSocket error (relay server not running?)');
+        };
+        
+        ws.onclose = () => {
+            console.log('❌ Display disconnected from relay server');
+            ws = null;
+            // Try to reconnect after 5 seconds
+            if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+            wsReconnectTimer = setTimeout(connectWebSocket, 5000);
+        };
+    } catch (e) {
+        console.warn('WebSocket not available:', e);
+    }
+}
+
+// Connect to WebSocket server on load
+connectWebSocket();
+
+// Poll localStorage for commands every 100ms
+setInterval(() => {
+    const timestampStr = localStorage.getItem(STORAGE_TIMESTAMP_KEY);
+    if (!timestampStr) return;
+    
+    const timestamp = parseInt(timestampStr);
+    if (timestamp <= lastProcessedTimestamp) return;
+    
+    const payloadStr = localStorage.getItem(STORAGE_KEY);
+    if (!payloadStr) return;
+    
+    try {
+        const payload = JSON.parse(payloadStr);
+        if (payload.command && payload.timestamp === timestamp) {
+            handleDisplayCommand(payload.command);
+            lastProcessedTimestamp = timestamp;
+        }
+    } catch (e) {
+        console.error('Failed to parse localStorage command:', e);
+    }
+}, 100);
+
+// Debounce for commands to prevent duplicates from multiple channels
+let lastCommandTimestamp = {};
+const COMMAND_DEBOUNCE = 200; // ms
+
+// Function to handle display commands
+function handleDisplayCommand(data) {
+    // Create unique key for this command
+    const commandKey = data.type + (data.id || '') + (data.amount || '');
+    const now = Date.now();
+    
+    // Check if we recently processed this exact command
+    if (lastCommandTimestamp[commandKey]) {
+        const timeSinceLastCommand = now - lastCommandTimestamp[commandKey];
+        if (timeSinceLastCommand < COMMAND_DEBOUNCE) {
+            console.log('Ignoring duplicate command:', data.type);
+            return; // Ignore duplicate
+        }
+    }
+    
+    // Update timestamp for this command
+    lastCommandTimestamp[commandKey] = now;
+    
+    // Clean up old timestamps (older than 1 second)
+    Object.keys(lastCommandTimestamp).forEach(key => {
+        if (now - lastCommandTimestamp[key] > 1000) {
+            delete lastCommandTimestamp[key];
+        }
+    });
     
     // New Donation
     if (data.type === 'NEW_DONATION') {
@@ -297,6 +394,13 @@ window.addEventListener('message', (event) => {
     if (data.type === 'TOGGLE_AUTO_ALERT') {
         autoAlertEnabled = data.enabled;
         console.log('Auto alert:', data.enabled);
+        
+        // Clear alert queue when turning OFF
+        if (!data.enabled) {
+            alertQueue = [];
+            console.log('Alert queue cleared (auto alert turned OFF)');
+            sendQueueStatusToParent();
+        }
     }
     
     // Set Alert Duration
@@ -377,7 +481,17 @@ window.addEventListener('message', (event) => {
         console.log('Alert queue cleared');
         sendQueueStatusToParent();
     }
+}
+
+// Listen for messages from parent window (iframe)
+window.addEventListener('message', (event) => {
+    handleDisplayCommand(event.data);
 });
+
+// Listen for BroadcastChannel messages (separate tabs/windows)
+displayChannel.onmessage = (event) => {
+    handleDisplayCommand(event.data);
+};
 
 // Send queue status to parent (dashboard)
 function sendQueueStatusToParent() {
@@ -386,11 +500,34 @@ function sendQueueStatusToParent() {
         amount: parseInt(donationAmount.textContent.replace(/[^\d]/g, ''))
     } : null;
     
-    window.parent.postMessage({
+    const statusData = {
         type: 'QUEUE_STATUS',
         queueLength: alertQueue.length,
         isShowingAlert: isShowingAlert,
         currentAlert: currentAlert,
         queue: alertQueue
-    }, '*');
+    };
+    
+    // Send to parent window (if in iframe)
+    if (window.parent !== window) {
+        window.parent.postMessage(statusData, '*');
+    }
+    
+    // Broadcast to all dashboard tabs/windows
+    displayChannel.postMessage(statusData);
+    
+    // Store status in localStorage for cross-browser communication
+    const statusPayload = {
+        status: statusData,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('apresiasi_display_status', JSON.stringify(statusPayload));
+    
+    // Send via WebSocket for cross-browser/incognito communication
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            clientType: 'display',
+            status: statusData
+        }));
+    }
 }

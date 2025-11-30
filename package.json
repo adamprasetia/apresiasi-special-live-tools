@@ -1,0 +1,16 @@
+{
+  "name": "apresiasi-relay",
+  "version": "1.0.0",
+  "description": "WebSocket relay server for Apresiasi display system",
+  "main": "relay-server.js",
+  "scripts": {
+    "start": "node relay-server.js",
+    "api": "node api-server.js",
+    "dev": "node relay-server.js & node api-server.js"
+  },
+  "dependencies": {
+    "ws": "^8.14.2",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  }
+}

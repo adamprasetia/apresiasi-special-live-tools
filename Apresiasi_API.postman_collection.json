@@ -1,0 +1,191 @@
+{
+  "info": {
+    "name": "Apresiasi Donation API",
+    "description": "API untuk mengirim donasi ke sistem Apresiasi Live Streaming",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/health",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["health"]
+        },
+        "description": "Cek status API server dan jumlah dashboard yang terkoneksi"
+      },
+      "response": []
+    },
+    {
+      "name": "Get API Info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Informasi endpoint dan contoh payload"
+      },
+      "response": []
+    },
+    {
+      "name": "Donation - Normal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"amount\": 50000,\n  \"message\": \"Semangat terus untuk jurnalisme berkualitas! 🎉\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Kirim donasi normal dengan nama dan pesan"
+      },
+      "response": []
+    },
+    {
+      "name": "Donation - Anonymous",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Secret Supporter\",\n  \"amount\": 100000,\n  \"message\": \"Dukung terus jurnalisme independen!\",\n  \"hideName\": true\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Kirim donasi anonim (nama akan ditampilkan sebagai 'Anonim')"
+      },
+      "response": []
+    },
+    {
+      "name": "Donation - No Message",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Siti Aminah\",\n  \"amount\": 25000\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Kirim donasi tanpa pesan (message opsional)"
+      },
+      "response": []
+    },
+    {
+      "name": "Donation - Large Amount",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"PT. Tech Solutions\",\n  \"amount\": 1000000,\n  \"message\": \"Dukungan untuk media berkualitas dari perusahaan kami\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Kirim donasi dengan jumlah besar"
+      },
+      "response": []
+    },
+    {
+      "name": "Donation - Invalid (No Name)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 50000,\n  \"message\": \"Test error validation\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Test error: nama tidak diisi (harus return 400 Bad Request)"
+      },
+      "response": []
+    },
+    {
+      "name": "Donation - Invalid (No Amount)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"John Doe\",\n  \"message\": \"Test error validation\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/api/donations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["api", "donations"]
+        },
+        "description": "Test error: amount tidak diisi (harus return 400 Bad Request)"
+      },
+      "response": []
+    }
+  ]
+}

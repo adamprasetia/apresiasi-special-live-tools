@@ -48,8 +48,11 @@ const alertQueueCount = document.getElementById('alertQueueCount');
 const alertQueueBadge = document.getElementById('alertQueueBadge');
 const currentAlertStatus = document.getElementById('currentAlertStatus');
 const clearAlertQueue = document.getElementById('clearAlertQueue');
+const displayConnectionStatus = document.getElementById('displayConnectionStatus');
+const refreshQueueStatus = document.getElementById('refreshQueueStatus');
 let alertQueueData = [];
 let isMonitoring = false;
+let lastQueueResponseTime = 0;
 
 // Test controls
 const testName = document.getElementById('testName');
@@ -557,6 +560,133 @@ function formatRupiah(number) {
         maximumFractionDigits: 0
     }).format(number);
 }
+// BroadcastChannel for cross-tab/window communication
+const displayChannel = new BroadcastChannel('apresiasi_display_channel');
+
+// LocalStorage key for cross-browser communication
+const STORAGE_KEY = 'apresiasi_display_command';
+const STORAGE_TIMESTAMP_KEY = 'apresiasi_display_timestamp';
+
+// WebSocket connection for cross-browser/incognito communication
+let ws = null;
+let wsReconnectTimer = null;
+
+// WebSocket connection for API server
+let wsApi = null;
+let wsApiReconnectTimer = null;
+
+function connectWebSocket() {
+    try {
+        ws = new WebSocket('ws://localhost:8765');
+        
+        ws.onopen = () => {
+            console.log('✅ Connected to relay server');
+            // Identify as dashboard
+            ws.send(JSON.stringify({ clientType: 'dashboard' }));
+        };
+        
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                // Handle status updates from display
+                if (data.type === 'QUEUE_STATUS') {
+                    updateAlertQueueDisplay(data);
+                }
+            } catch (e) {
+                console.error('Failed to parse WebSocket message:', e);
+            }
+        };
+        
+        ws.onerror = (error) => {
+            console.warn('WebSocket error (relay server not running?)');
+        };
+        
+        ws.onclose = () => {
+            console.log('❌ Disconnected from relay server');
+            ws = null;
+            // Try to reconnect after 5 seconds
+            if (wsReconnectTimer) clearTimeout(wsReconnectTimer);
+            wsReconnectTimer = setTimeout(connectWebSocket, 5000);
+        };
+    } catch (e) {
+        console.warn('WebSocket not available:', e);
+    }
+}
+
+function connectApiWebSocket() {
+    try {
+        wsApi = new WebSocket('ws://localhost:8766');
+        
+        wsApi.onopen = () => {
+            console.log('✅ Connected to API server');
+        };
+        
+        wsApi.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                // Handle donations from API
+                if (data.type === 'API_DONATION') {
+                    handleApiDonation(data.donation);
+                }
+            } catch (e) {
+                console.error('Failed to parse API message:', e);
+            }
+        };
+        
+        wsApi.onerror = (error) => {
+            console.warn('API WebSocket error (API server not running?)');
+        };
+        
+        wsApi.onclose = () => {
+            console.log('❌ Disconnected from API server');
+            wsApi = null;
+            // Try to reconnect after 5 seconds
+            if (wsApiReconnectTimer) clearTimeout(wsApiReconnectTimer);
+            wsApiReconnectTimer = setTimeout(connectApiWebSocket, 5000);
+        };
+    } catch (e) {
+        console.warn('API WebSocket not available:', e);
+    }
+}
+
+function handleApiDonation(donation) {
+    console.log('📬 Received donation from API:', donation);
+    
+    const donationData = {
+        name: donation.name,
+        amount: donation.amount,
+        message: donation.message || '',
+        hideName: donation.hideName || false
+    };
+    
+    // Check if moderation is enabled
+    if (enableModeration.checked) {
+        addToQueue(donationData);
+        showNotification(`📬 Donasi API: ${donation.hideName ? 'Anonim' : donation.name} - ${formatRupiah(donation.amount)}`, 'info');
+    } else {
+        // Send directly to display
+        const displayData = {
+            type: 'NEW_DONATION',
+            id: donation.id,
+            ...donationData
+        };
+        sendToDisplay(displayData);
+        
+        // Add to live donations
+        addToLiveDonations({
+            id: donation.id,
+            displayName: donation.hideName ? 'Anonim' : donation.name,
+            amount: donation.amount,
+            message: donation.message || ''
+        });
+        
+        showNotification(`📬 Donasi API langsung tayang: ${donation.hideName ? 'Anonim' : donation.name} - ${formatRupiah(donation.amount)}`, 'success');
+    }
+}
+
+// Connect to WebSocket servers on load
+connectWebSocket();
+connectApiWebSocket();
 
 // Send message to display window
 function sendToDisplay(message) {
@@ -568,6 +698,25 @@ function sendToDisplay(message) {
     // Send to popup window if exists
     if (displayWindow && !displayWindow.closed) {
         displayWindow.postMessage(message, '*');
+    }
+    
+    // Broadcast to all display windows/tabs (same browser)
+    displayChannel.postMessage(message);
+    
+    // Store in localStorage for cross-browser/persistent communication
+    const payload = {
+        command: message,
+        timestamp: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    localStorage.setItem(STORAGE_TIMESTAMP_KEY, Date.now().toString());
+    
+    // Send via WebSocket for cross-browser/incognito communication
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            clientType: 'dashboard',
+            command: message
+        }));
     }
 }
 
@@ -803,6 +952,33 @@ window.addEventListener('message', (event) => {
     }
 });
 
+// Listen for messages from BroadcastChannel
+displayChannel.onmessage = (event) => {
+    console.log('Dashboard received broadcast:', event.data);
+    
+    // Handle Queue Status from display
+    if (event.data.type === 'QUEUE_STATUS') {
+        updateAlertQueueDisplay(event.data);
+    }
+};
+
+// Poll localStorage for status updates from display (cross-browser)
+let lastStatusTimestamp = 0;
+setInterval(() => {
+    const statusStr = localStorage.getItem('apresiasi_display_status');
+    if (!statusStr) return;
+    
+    try {
+        const payload = JSON.parse(statusStr);
+        if (payload.status && payload.timestamp > lastStatusTimestamp) {
+            updateAlertQueueDisplay(payload.status);
+            lastStatusTimestamp = payload.timestamp;
+        }
+    } catch (e) {
+        console.error('Failed to parse display status:', e);
+    }
+}, 500);
+
 // Live Donations Management
 function addToLiveDonations(donation) {
     const liveItem = {
@@ -916,11 +1092,65 @@ setInterval(() => {
 }, 1000);
 
 // Alert Queue Management
+let lastQueueUpdateTimestamp = 0;
+const QUEUE_UPDATE_DEBOUNCE = 100; // ms
+
 function requestQueueStatus() {
     sendToDisplay({ type: 'GET_QUEUE_STATUS' });
 }
 
+function updateDisplayConnectionStatus() {
+    if (!displayConnectionStatus) return;
+    
+    const now = Date.now();
+    const timeSinceLastResponse = now - lastQueueResponseTime;
+    
+    if (lastQueueResponseTime === 0) {
+        displayConnectionStatus.textContent = '⚠️ Belum Terhubung';
+        displayConnectionStatus.style.color = '#dc3545';
+    } else if (timeSinceLastResponse < 3000) {
+        displayConnectionStatus.textContent = '✅ Terhubung';
+        displayConnectionStatus.style.color = '#28a745';
+    } else if (timeSinceLastResponse < 10000) {
+        displayConnectionStatus.textContent = '⚠️ Koneksi Lemah';
+        displayConnectionStatus.style.color = '#ff9800';
+    } else {
+        displayConnectionStatus.textContent = '❌ Terputus';
+        displayConnectionStatus.style.color = '#dc3545';
+    }
+}
+
+// Manual refresh button
+if (refreshQueueStatus) {
+    refreshQueueStatus.addEventListener('click', () => {
+        requestQueueStatus();
+        refreshQueueStatus.disabled = true;
+        refreshQueueStatus.textContent = 'Refreshing...';
+        setTimeout(() => {
+            refreshQueueStatus.disabled = false;
+            refreshQueueStatus.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                </svg>
+                Refresh Status
+            `;
+        }, 500);
+    });
+}
+
 function updateAlertQueueDisplay(queueData) {
+    // Debounce: ignore updates within 100ms
+    const now = Date.now();
+    if (now - lastQueueUpdateTimestamp < QUEUE_UPDATE_DEBOUNCE) {
+        return;
+    }
+    lastQueueUpdateTimestamp = now;
+    
+    // Update last response time for connection status
+    lastQueueResponseTime = now;
+    updateDisplayConnectionStatus();
+    
     const count = queueData.queueLength || 0;
     const isShowing = queueData.isShowingAlert || false;
     const queue = queueData.queue || [];
@@ -998,6 +1228,11 @@ clearAlertQueue.addEventListener('click', () => {
 setInterval(() => {
     requestQueueStatus();
 }, 1000);
+
+// Update connection status every 2 seconds
+setInterval(() => {
+    updateDisplayConnectionStatus();
+}, 2000);
 
 // Initial state
 console.log('Dashboard initialized');
