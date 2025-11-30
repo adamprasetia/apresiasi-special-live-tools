@@ -85,7 +85,7 @@ function showDonationAlert(donation, customDuration) {
     }
     
     // Apply position class
-    donationAlert.classList.remove('alert-center', 'alert-top', 'alert-bottom');
+    donationAlert.classList.remove('alert-center', 'alert-top', 'alert-bottom', 'alert-top-left', 'alert-top-right', 'alert-bottom-left', 'alert-bottom-right');
     donationAlert.classList.add(`alert-${alertPosition}`);
     
     // Show alert

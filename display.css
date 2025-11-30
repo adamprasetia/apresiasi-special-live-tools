@@ -79,6 +79,50 @@ body {
     transform: translate(-50%, 0) scale(1);
 }
 
+.donation-alert.alert-top-left {
+    top: 5%;
+    left: 5%;
+    transform: translate(-100%, -100%) scale(0);
+}
+
+.donation-alert.alert-top-left.show {
+    transform: translate(0, 0) scale(1);
+}
+
+.donation-alert.alert-top-right {
+    top: 5%;
+    right: 5%;
+    left: auto;
+    transform: translate(100%, -100%) scale(0);
+}
+
+.donation-alert.alert-top-right.show {
+    transform: translate(0, 0) scale(1);
+}
+
+.donation-alert.alert-bottom-left {
+    top: auto;
+    bottom: 5%;
+    left: 5%;
+    transform: translate(-100%, 100%) scale(0);
+}
+
+.donation-alert.alert-bottom-left.show {
+    transform: translate(0, 0) scale(1);
+}
+
+.donation-alert.alert-bottom-right {
+    top: auto;
+    bottom: 5%;
+    right: 5%;
+    left: auto;
+    transform: translate(100%, 100%) scale(0);
+}
+
+.donation-alert.alert-bottom-right.show {
+    transform: translate(0, 0) scale(1);
+}
+
 .donation-alert.show {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
