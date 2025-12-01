@@ -32,7 +32,7 @@
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
-                    <span>Antrian Donasi</span>
+                    <span>Antrian Apresiasi</span>
                     <span class="nav-badge" id="queueBadge">0</span>
                 </a>
                 <a href="#" class="nav-item" data-section="live">
@@ -40,7 +40,7 @@
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
-                    <span>Donasi Tayang</span>
+                    <span>Apresiasi Tayang</span>
                 </a>
                 <a href="#" class="nav-item" data-section="alertqueue">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,7 +54,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
-                    <span>Test Donasi</span>
+                    <span>Test Apresiasi</span>
                 </a>
                 <a href="#" class="nav-item" data-section="preview">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -100,7 +100,7 @@
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="card-description">Panel daftar 5 apresiasi terbaru di kanan atas</p>
+                        <p class="card-description">Panel daftar 5 apresiasi terbaru</p>
                         <div class="card-actions">
                             <select class="form-select" id="positionRecent">
                                 <option value="top-right">Kanan Atas</option>
@@ -120,7 +120,7 @@
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="card-description">Panel total apresiasi terkumpul di kiri bawah</p>
+                        <p class="card-description">Panel total apresiasi terkumpul</p>
                         <div class="card-actions">
                             <select class="form-select" id="positionCounter">
                                 <option value="bottom-left">Kiri Bawah</option>
@@ -140,7 +140,7 @@
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="card-description">QR Code untuk scan donasi di kanan bawah</p>
+                        <p class="card-description">QR Code untuk scan apresiasi</p>
                         <div class="card-actions">
                             <select class="form-select" id="positionQR">
                                 <option value="bottom-right">Kanan Bawah</option>
@@ -154,13 +154,13 @@
                     <!-- Alert Control -->
                     <div class="control-card">
                         <div class="card-header">
-                            <h3>Donation Alert</h3>
+                            <h3>Apresiasi Alert</h3>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="autoAlert">
                                 <span class="toggle-slider">
                             </label>
                         </div>
-                        <p class="card-description">Pop-up animasi saat ada donasi baru</p>
+                        <p class="card-description">Pop-up animasi saat ada apresiasi baru</p>
                         
                         <div class="form-group" style="margin-top: 15px;">
                             <label for="alertDuration" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Durasi Tampil (detik)</label>
@@ -188,13 +188,13 @@
                     <!-- Moderation Control -->
                     <div class="control-card">
                         <div class="card-header">
-                            <h3>Moderasi Donasi</h3>
+                            <h3>Moderasi Apresiasi</h3>
                             <label class="toggle-switch">
                                 <input type="checkbox" id="enableModeration" checked>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="card-description">Tunda tampilan donasi untuk moderasi manual</p>
+                        <p class="card-description">Tunda tampilan apresiasi untuk moderasi manual</p>
                         <div class="card-actions">
                             <span class="badge success" id="moderationBadge">Moderasi Aktif</span>
                         </div>
@@ -209,12 +209,12 @@
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="card-description">Otomatis menyetujui donasi setelah waktu tunggu tertentu</p>
+                        <p class="card-description">Otomatis menyetujui apresiasi setelah waktu tunggu tertentu</p>
                         
                         <div class="form-group" style="margin-top: 15px;">
                             <label for="autoApproveDelay" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Waktu Tunggu Maksimal (detik)</label>
                             <input type="number" id="autoApproveDelay" class="form-input" value="30" min="5" max="300" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-                            <small style="color: #666; font-size: 12px;">Donasi akan otomatis disetujui setelah waktu ini</small>
+                            <small style="color: #666; font-size: 12px;">Apresiasi akan otomatis disetujui setelah waktu ini</small>
                         </div>
                         
                         <div class="card-actions" style="margin-top: 15px;">
@@ -227,8 +227,8 @@
             <!-- Queue Section -->
             <section class="content-section" id="queueSection">
                 <div class="section-header">
-                    <h2>Antrian Donasi Masuk</h2>
-                    <p>Review dan moderasi donasi sebelum ditampilkan di layar</p>
+                    <h2>Antrian Apresiasi Masuk</h2>
+                    <p>Review dan moderasi apresiasi sebelum ditampilkan di layar</p>
                 </div>
 
                 <!-- Auto Approve Settings -->
@@ -241,7 +241,7 @@
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
-                        <p class="card-description">Otomatis menyetujui donasi setelah waktu tunggu tertentu</p>
+                        <p class="card-description">Otomatis menyetujui apresiasi setelah waktu tunggu tertentu</p>
                         
                         <div class="form-group" style="margin-top: 15px;">
                             <label for="autoApproveDelayQueue" style="display: block; margin-bottom: 5px; font-size: 14px; color: #666;">Waktu Tunggu Maksimal (detik)</label>
@@ -271,8 +271,8 @@
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                 <circle cx="12" cy="7" r="4"></circle>
                             </svg>
-                            <p>Belum ada donasi yang masuk</p>
-                            <small>Donasi baru akan muncul di sini untuk direview</small>
+                            <p>Belum ada apresiasi yang masuk</p>
+                            <small>Apresiasi baru akan muncul di sini untuk direview</small>
                         </div>
                     </div>
                 </div>
@@ -281,15 +281,15 @@
             <!-- Live Donations Section -->
             <section class="content-section" id="liveSection">
                 <div class="section-header">
-                    <h2>Donasi Sedang Tayang</h2>
-                    <p>Daftar donasi yang sedang ditampilkan di layar live streaming</p>
+                    <h2>Apresiasi Sedang Tayang</h2>
+                    <p>Daftar apresiasi yang sedang ditampilkan di layar live streaming</p>
                 </div>
 
                 <div class="live-donations">
                     <div class="live-header">
                         <div class="live-stats">
                             <div class="stat-item">
-                                <span class="stat-label">Total Donasi Tayang</span>
+                                <span class="stat-label">Total Apresiasi Tayang</span>
                                 <span class="stat-value" id="liveDonationCount">0</span>
                             </div>
                             <div class="stat-item">
@@ -312,8 +312,8 @@
                                 <rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect>
                                 <polyline points="17 2 12 7 7 2"></polyline>
                             </svg>
-                            <p>Belum ada donasi yang tayang</p>
-                            <small>Donasi yang disetujui akan muncul di sini</small>
+                            <p>Belum ada apresiasi yang tayang</p>
+                            <small>Apresiasi yang disetujui akan muncul di sini</small>
                         </div>
                     </div>
                 </div>
@@ -377,17 +377,17 @@
             <!-- Test Donation Section -->
             <section class="content-section" id="donationSection">
                 <div class="section-header">
-                    <h2>Test Donasi Manual</h2>
-                    <p>Kirim donasi test untuk mencoba tampilan di layar live streaming</p>
+                    <h2>Test Apresiasi Manual</h2>
+                    <p>Kirim apresiasi test untuk mencoba tampilan di layar live streaming</p>
                 </div>
                 <div class="test-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Nama Donatur</label>
+                            <label>Nama Pendukung</label>
                             <input type="text" id="testName" class="form-control" placeholder="Masukkan nama" value="John Doe">
                         </div>
                         <div class="form-group">
-                            <label>Jumlah Donasi</label>
+                            <label>Jumlah Apresiasi</label>
                             <input type="number" id="testAmount" class="form-control" placeholder="50000" value="50000">
                         </div>
                     </div>
@@ -406,7 +406,7 @@
                             <line x1="22" y1="2" x2="11" y2="13"></line>
                             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                         </svg>
-                        Kirim Test Donasi
+                        Kirim Test Apresiasi
                     </button>
                 </div>
 
