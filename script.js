@@ -176,7 +176,7 @@ donationForm.addEventListener('submit', async (e) => {
         console.log('Sending payload:', payload);
         
         // Send to API
-        const response = await fetch('http://api-staging.kompas.com/superthank/message', {
+        const response = await fetch('https://api-staging.kompas.com/superthank/message', {
             method: 'POST',
             body: JSON.stringify(payload)
         });
