@@ -19,12 +19,25 @@ const server = http.createServer((req, res) => {
     
     // Health check endpoint
     if (req.url === '/health' && req.method === 'GET') {
+        // Count campaigns
+        const campaignStats = {};
+        dashboardClients.forEach((info) => {
+            campaignStats[info.campaign] = campaignStats[info.campaign] || { dashboards: 0, displays: 0 };
+            campaignStats[info.campaign].dashboards++;
+        });
+        displayClients.forEach((info) => {
+            campaignStats[info.campaign] = campaignStats[info.campaign] || { dashboards: 0, displays: 0 };
+            campaignStats[info.campaign].displays++;
+        });
+        
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
             status: 'ok',
             service: 'Apresiasi Relay Server',
-            dashboards: dashboardClients.size,
-            displays: displayClients.size,
+            totalDashboards: dashboardClients.size,
+            totalDisplays: displayClients.size,
+            totalApis: apiClients.size,
+            campaigns: campaignStats,
             timestamp: new Date().toISOString()
         }));
         return;
@@ -36,8 +49,9 @@ const server = http.createServer((req, res) => {
 
 const wss = new WebSocket.Server({ server });
 
-let dashboardClients = new Set();
-let displayClients = new Set();
+// Store clients with their campaign information
+let dashboardClients = new Map(); // ws -> { campaign: string }
+let displayClients = new Map();   // ws -> { campaign: string }
 let apiClients = new Set();
 
 wss.on('connection', (ws) => {
@@ -49,25 +63,27 @@ wss.on('connection', (ws) => {
             
             // Identify client type
             if (data.clientType === 'dashboard') {
-                dashboardClients.add(ws);
-                console.log('Dashboard connected. Total dashboards:', dashboardClients.size);
+                const campaign = data.campaign || 'default';
+                dashboardClients.set(ws, { campaign });
+                console.log(`Dashboard connected to campaign: ${campaign}. Total dashboards:`, dashboardClients.size);
                 
-                // Relay command to all displays
+                // Relay command to displays in the same campaign
                 if (data.command) {
-                    displayClients.forEach(client => {
-                        if (client.readyState === WebSocket.OPEN) {
+                    displayClients.forEach((clientInfo, client) => {
+                        if (clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify(data.command));
                         }
                     });
                 }
             } else if (data.clientType === 'display') {
-                displayClients.add(ws);
-                console.log('Display connected. Total displays:', displayClients.size);
+                const campaign = data.campaign || 'default';
+                displayClients.set(ws, { campaign });
+                console.log(`Display connected to campaign: ${campaign}. Total displays:`, displayClients.size);
                 
-                // Relay status to all dashboards
+                // Relay status to dashboards in the same campaign
                 if (data.status) {
-                    dashboardClients.forEach(client => {
-                        if (client.readyState === WebSocket.OPEN) {
+                    dashboardClients.forEach((clientInfo, client) => {
+                        if (clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify(data.status));
                         }
                     });
@@ -76,10 +92,11 @@ wss.on('connection', (ws) => {
                 apiClients.add(ws);
                 console.log('API Server connected. Total API servers:', apiClients.size);
             } else if (data.type === 'API_DONATION') {
-                // Broadcast donation from API to all dashboards
-                console.log('📬 Received donation from API, broadcasting to dashboards...');
-                dashboardClients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
+                // Broadcast donation from API to dashboards in specific campaign
+                const campaign = data.campaign || 'default';
+                console.log(`📬 Received donation from API for campaign: ${campaign}, broadcasting to dashboards...`);
+                dashboardClients.forEach((clientInfo, client) => {
+                    if (clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
                         client.send(JSON.stringify(data));
                     }
                 });

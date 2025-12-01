@@ -2,6 +2,11 @@
 const navItems = document.querySelectorAll('.nav-item');
 const contentSections = document.querySelectorAll('.content-section');
 
+// Get campaign from URL parameter (must be early to use in iframe src)
+const urlParams = new URLSearchParams(window.location.search);
+const campaign = urlParams.get('campaign') || 'default';
+console.log(`📺 Campaign: ${campaign}`);
+
 // Toggle controls
 const toggleRecent = document.getElementById('toggleRecent');
 const toggleCounter = document.getElementById('toggleCounter');
@@ -75,6 +80,11 @@ const resetAll = document.getElementById('resetAll');
 
 // Get display window reference
 let displayWindow = null;
+
+// Set iframe src with campaign parameter
+if (displayPreview) {
+    displayPreview.src = `display.html?campaign=${campaign}`;
+}
 
 // Mobile menu elements
 const mobileMenuToggle = document.getElementById('mobileMenuToggle');
@@ -560,12 +570,13 @@ function formatRupiah(number) {
         maximumFractionDigits: 0
     }).format(number);
 }
-// BroadcastChannel for cross-tab/window communication
-const displayChannel = new BroadcastChannel('apresiasi_display_channel');
 
-// LocalStorage key for cross-browser communication
-const STORAGE_KEY = 'apresiasi_display_command';
-const STORAGE_TIMESTAMP_KEY = 'apresiasi_display_timestamp';
+// BroadcastChannel for cross-tab/window communication (campaign-specific)
+const displayChannel = new BroadcastChannel(`apresiasi_display_channel_${campaign}`);
+
+// LocalStorage key for cross-browser communication (campaign-specific)
+const STORAGE_KEY = `apresiasi_display_command_${campaign}`;
+const STORAGE_TIMESTAMP_KEY = `apresiasi_display_timestamp_${campaign}`;
 
 // WebSocket connection for cross-browser/incognito communication
 let ws = null;
@@ -577,17 +588,22 @@ function connectWebSocket() {
         ws = new WebSocket('wss://apresiasi-special-live-tools-production-43ea.up.railway.app');
         
         ws.onopen = () => {
-            console.log('✅ Connected to relay server');
-            // Identify as dashboard
-            ws.send(JSON.stringify({ clientType: 'dashboard' }));
+            console.log(`✅ Connected to relay server (Campaign: ${campaign})`);
+            // Identify as dashboard with campaign
+            ws.send(JSON.stringify({ 
+                clientType: 'dashboard',
+                campaign: campaign
+            }));
         };
         
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
                 
-                // Handle status updates from display
+                // Handle status updates from display (filter by campaign)
                 if (data.type === 'QUEUE_STATUS') {
+                    // Only process if no campaign field (from PostMessage/BroadcastChannel)
+                    // or if campaign matches (from WebSocket via relay)
                     updateAlertQueueDisplay(data);
                 }
                 
@@ -683,6 +699,7 @@ function sendToDisplay(message) {
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
             clientType: 'dashboard',
+            campaign: campaign,
             command: message
         }));
     }
@@ -884,12 +901,12 @@ testAlertBtn.addEventListener('click', () => {
 
 // Refresh Preview
 refreshPreview.addEventListener('click', () => {
-    displayPreview.src = displayPreview.src;
+    displayPreview.src = `display.html?campaign=${campaign}`;
 });
 
 // Open in New Window
 openNewWindow.addEventListener('click', () => {
-    displayWindow = window.open('display.html', 'DisplayWindow', 'width=1920,height=1080');
+    displayWindow = window.open(`display.html?campaign=${campaign}`, 'DisplayWindow', 'width=1920,height=1080');
 });
 
 // Reset All
@@ -914,9 +931,14 @@ resetAll.addEventListener('click', () => {
 window.addEventListener('message', (event) => {
     console.log('Dashboard received message:', event.data);
     
-    // Handle Queue Status from display
+    // Handle Queue Status from display (filter by campaign)
     if (event.data.type === 'QUEUE_STATUS') {
-        updateAlertQueueDisplay(event.data);
+        // Only process if campaign matches or no campaign field (backward compatibility)
+        if (!event.data.campaign || event.data.campaign === campaign) {
+            updateAlertQueueDisplay(event.data);
+        } else {
+            console.log(`Ignoring QUEUE_STATUS from different campaign: ${event.data.campaign}`);
+        }
     }
 });
 
@@ -924,16 +946,19 @@ window.addEventListener('message', (event) => {
 displayChannel.onmessage = (event) => {
     console.log('Dashboard received broadcast:', event.data);
     
-    // Handle Queue Status from display
+    // Handle Queue Status from display (filter by campaign)
     if (event.data.type === 'QUEUE_STATUS') {
-        updateAlertQueueDisplay(event.data);
+        // Only process if campaign matches or no campaign field
+        if (!event.data.campaign || event.data.campaign === campaign) {
+            updateAlertQueueDisplay(event.data);
+        }
     }
 };
 
 // Poll localStorage for status updates from display (cross-browser)
 let lastStatusTimestamp = 0;
 setInterval(() => {
-    const statusStr = localStorage.getItem('apresiasi_display_status');
+    const statusStr = localStorage.getItem(`apresiasi_display_status_${campaign}`);
     if (!statusStr) return;
     
     try {

@@ -194,9 +194,12 @@ function addDonationQuiet(donation) {
 // Show elements on page load
 window.addEventListener('load', () => {
     // Generate QR Code
+    // Get base URL dynamically based on current location
+    const baseUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}`;
+    const qrUrl = `${baseUrl}/index.html?campaign=${campaign}`;
+    
     new QRCode(qrCode, {
-        // text: 'https://apresiasi.kompas.com',
-        text: 'https://adamprasetia.github.io/apresiasi-special-live-tools/',
+        text: qrUrl,
         width: 120,
         height: 120,
         colorDark: '#005AA9',
@@ -242,12 +245,17 @@ let demoIndex = 0;
     demoIndex++;
 }, 15000); */
 
-// BroadcastChannel for cross-tab/window communication
-const displayChannel = new BroadcastChannel('apresiasi_display_channel');
+// Campaign system - allows multiple simultaneous live streams with isolated queues
+const urlParams = new URLSearchParams(window.location.search);
+const campaign = urlParams.get('campaign') || 'default';
+console.log(`🎯 Display initialized for campaign: ${campaign}`);
 
-// LocalStorage polling for cross-browser communication
-const STORAGE_KEY = 'apresiasi_display_command';
-const STORAGE_TIMESTAMP_KEY = 'apresiasi_display_timestamp';
+// BroadcastChannel for cross-tab/window communication (campaign-specific)
+const displayChannel = new BroadcastChannel(`apresiasi_display_channel_${campaign}`);
+
+// LocalStorage polling for cross-browser communication (campaign-specific keys)
+const STORAGE_KEY = `apresiasi_display_command_${campaign}`;
+const STORAGE_TIMESTAMP_KEY = `apresiasi_display_timestamp_${campaign}`;
 let lastProcessedTimestamp = 0;
 
 // WebSocket connection for cross-browser/incognito communication
@@ -260,9 +268,12 @@ function connectWebSocket() {
         ws = new WebSocket('wss://apresiasi-special-live-tools-production-43ea.up.railway.app');
         
         ws.onopen = () => {
-            console.log('✅ Display connected to relay server');
-            // Identify as display
-            ws.send(JSON.stringify({ clientType: 'display' }));
+            console.log(`✅ Display connected to relay server (Campaign: ${campaign})`);
+            // Identify as display with campaign
+            ws.send(JSON.stringify({ 
+                clientType: 'display',
+                campaign: campaign
+            }));
         };
         
         ws.onmessage = (event) => {
@@ -504,6 +515,7 @@ function sendQueueStatusToParent() {
     
     const statusData = {
         type: 'QUEUE_STATUS',
+        campaign: campaign,
         queueLength: alertQueue.length,
         isShowingAlert: isShowingAlert,
         currentAlert: currentAlert,
@@ -518,17 +530,18 @@ function sendQueueStatusToParent() {
     // Broadcast to all dashboard tabs/windows
     displayChannel.postMessage(statusData);
     
-    // Store status in localStorage for cross-browser communication
+    // Store status in localStorage for cross-browser communication (campaign-specific)
     const statusPayload = {
         status: statusData,
         timestamp: Date.now()
     };
-    localStorage.setItem('apresiasi_display_status', JSON.stringify(statusPayload));
+    localStorage.setItem(`apresiasi_display_status_${campaign}`, JSON.stringify(statusPayload));
     
     // Send via WebSocket for cross-browser/incognito communication
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
             clientType: 'display',
+            campaign: campaign,
             status: statusData
         }));
     }

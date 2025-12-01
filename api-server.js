@@ -49,9 +49,10 @@ function sendToRelayServer(donation) {
     if (relayWs && relayWs.readyState === WebSocket.OPEN) {
         relayWs.send(JSON.stringify({
             type: 'API_DONATION',
+            campaign: donation.campaign || 'default',
             donation: donation
         }));
-        console.log('📤 Sent to relay server');
+        console.log(`📤 Sent to relay server (Campaign: ${donation.campaign || 'default'})`);
     } else {
         console.warn('⚠️  Relay server not connected, donation not broadcasted');
     }
@@ -69,7 +70,7 @@ app.get('/health', (req, res) => {
 // POST donation endpoint
 app.post('/api/donations', (req, res) => {
     try {
-        const { name, amount, message, hideName } = req.body;
+        const { name, amount, message, hideName, campaign } = req.body;
         
         // Validation
         if (!name || name.trim() === '') {
@@ -87,20 +88,23 @@ app.post('/api/donations', (req, res) => {
         }
         
         // Create donation object
+        const donationCampaign = campaign || 'default';
         const donation = {
             id: Date.now(),
             name: name.trim(),
             amount: parseInt(amount),
             message: message ? message.trim() : '',
             hideName: hideName === true || hideName === 'true',
+            campaign: donationCampaign,
             timestamp: new Date().toISOString(),
             source: 'api'
         };
         
-        // Send to relay server (will broadcast to all dashboards)
+        // Send to relay server (will broadcast to dashboards in the same campaign)
         sendToRelayServer(donation);
         
         console.log('💰 New donation received:', {
+            campaign: donationCampaign,
             name: donation.hideName ? 'Anonim' : donation.name,
             amount: `Rp ${donation.amount.toLocaleString('id-ID')}`,
             message: donation.message || '-'
@@ -136,7 +140,8 @@ app.get('/api/donations', (req, res) => {
             name: 'John Doe',
             amount: 50000,
             message: 'Semangat terus!',
-            hideName: false
+            hideName: false,
+            campaign: 'default'
         }
     });
 });

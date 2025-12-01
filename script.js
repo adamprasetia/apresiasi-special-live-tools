@@ -17,6 +17,11 @@ const openTermsModal = document.getElementById('openTermsModal');
 const closeModal = document.getElementById('closeModal');
 const acceptTerms = document.getElementById('acceptTerms');
 
+// Campaign system - extract from URL parameter
+const urlParams = new URLSearchParams(window.location.search);
+const campaign = urlParams.get('campaign') || 'default';
+console.log(`🎯 Form initialized for campaign: ${campaign}`);
+
 // State
 let selectedAmount = 0;
 
@@ -170,7 +175,8 @@ donationForm.addEventListener('submit', async (e) => {
             user_email: emailInput.value.trim(),
             price: selectedAmount,
             message: messageInput.value.trim(),
-            anonim: hideNameCheckbox.checked ? 1 : 0
+            anonim: hideNameCheckbox.checked ? 1 : 0,
+            campaign: campaign  // Add campaign parameter
         };
         
         console.log('Sending payload:', payload);
