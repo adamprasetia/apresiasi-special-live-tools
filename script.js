@@ -150,7 +150,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 // Handle form submission
-donationForm.addEventListener('submit', (e) => {
+donationForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
     if (selectedAmount < 5000) {
@@ -158,34 +158,49 @@ donationForm.addEventListener('submit', (e) => {
         return;
     }
     
-    // Get form data
-    const formData = {
-        amount: selectedAmount,
-        name: nameInput.value.trim(),
-        email: emailInput.value.trim(),
-        message: messageInput.value.trim(),
-        hideName: hideNameCheckbox.checked,
-        timestamp: new Date().toISOString()
-    };
+    // Disable submit button to prevent double submission
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Memproses...';
     
-    // Log form data (in production, this would send to backend)
-    console.log('Donation Data:', formData);
-    
-    // Prepare display name
-    const displayName = formData.hideName ? 'Anonim' : formData.name;
-    const messageText = formData.message ? `\n\nPesan: "${formData.message}"` : '';
-    
-    // Show success message
-    alert(`Terima kasih ${displayName}!\n\nDonasi Anda sebesar ${formatRupiah(formData.amount)} akan diproses.${messageText}\n\nKonfirmasi akan dikirim ke ${formData.email}`);
-    
-    // Reset form
-    donationForm.reset();
-    amountButtons.forEach(btn => btn.classList.remove('active'));
-    selectedAmount = 0;
-    termsCheckbox.checked = false;
-    charCount.textContent = '0/500 karakter';
-    updateTotalAmount();
-    validateForm();
+    try {
+        // Prepare payload
+        const payload = {
+            urlpage: "https://apresiasi.kompas.com",
+            user_name: nameInput.value.trim(),
+            user_email: emailInput.value.trim(),
+            price: selectedAmount,
+            message: messageInput.value.trim(),
+            anonim: hideNameCheckbox.checked ? 1 : 0
+        };
+        
+        console.log('Sending payload:', payload);
+        
+        // Send to API
+        const response = await fetch('http://api-staging.kompas.com/superthank/message', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        
+        const result = await response.json();
+        
+        console.log('API Response:', result);
+        
+        if (result.status && result.data && result.data.payment_link) {
+            // Redirect to payment link
+            window.location.href = result.data.payment_link;
+        } else {
+            throw new Error('Invalid response from server');
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memproses donasi. Silakan coba lagi.');
+        
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Lanjutkan Pembayaran';
+        validateForm();
+    }
 });
 
 // Initialize
