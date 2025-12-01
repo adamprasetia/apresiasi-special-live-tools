@@ -170,7 +170,7 @@ donationForm.addEventListener('submit', async (e) => {
     try {
         // Prepare payload
         const payload = {
-            urlpage: "https://apresiasi.kompas.com",
+            urlpage: `${window.location.origin}${window.location.pathname}?campaign=${campaign}`,
             user_name: nameInput.value.trim(),
             user_email: emailInput.value.trim(),
             price: selectedAmount,
