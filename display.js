@@ -200,18 +200,12 @@ window.addEventListener('load', () => {
     
     new QRCode(qrCode, {
         text: qrUrl,
-        width: 120,
-        height: 120,
-        colorDark: '#005AA9',
+        width: 138,
+        height: 138,
+        colorDark: '#000000',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.H
     });
-    
-    // Update QR URL text
-    const qrUrlElement = document.querySelector('.qr-url');
-    if (qrUrlElement) {
-        qrUrlElement.textContent = qrUrl;
-    }
     
     // Elements are hidden by default, controlled by dashboard
 });
