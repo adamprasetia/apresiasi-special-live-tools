@@ -328,19 +328,27 @@ setInterval(() => {
 
 // Debounce for commands to prevent duplicates from multiple channels
 let lastCommandTimestamp = {};
-const COMMAND_DEBOUNCE = 500; // ms - increased to prevent double processing
+const COMMAND_DEBOUNCE = 1000; // ms - increased to 1 second for better deduplication
 
 // Function to handle display commands
 function handleDisplayCommand(data) {
-    // Create unique key for this command - use more specific identifiers
-    const commandKey = `${data.type}_${data.id || ''}_${data.name || ''}_${data.amount || ''}`;
+    // Create unique key for this command
+    // For NEW_DONATION, use ID as primary identifier since it's unique
+    let commandKey;
+    if (data.type === 'NEW_DONATION' && data.id) {
+        commandKey = `${data.type}_${data.id}`;
+    } else {
+        // For other commands, use type + relevant fields
+        commandKey = `${data.type}_${data.element || ''}_${data.position || ''}_${data.enabled || ''}`;
+    }
+    
     const now = Date.now();
     
     // Check if we recently processed this exact command
     if (lastCommandTimestamp[commandKey]) {
         const timeSinceLastCommand = now - lastCommandTimestamp[commandKey];
         if (timeSinceLastCommand < COMMAND_DEBOUNCE) {
-            console.log('Ignoring duplicate command:', data.type, commandKey);
+            console.log('⚠️ Ignoring duplicate command:', data.type, commandKey);
             return; // Ignore duplicate
         }
     }
@@ -348,9 +356,9 @@ function handleDisplayCommand(data) {
     // Update timestamp for this command
     lastCommandTimestamp[commandKey] = now;
     
-    // Clean up old timestamps (older than 2 seconds)
+    // Clean up old timestamps (older than 3 seconds)
     Object.keys(lastCommandTimestamp).forEach(key => {
-        if (now - lastCommandTimestamp[key] > 2000) {
+        if (now - lastCommandTimestamp[key] > 3000) {
             delete lastCommandTimestamp[key];
         }
     });
