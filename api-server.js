@@ -17,7 +17,7 @@ let relayReconnectTimer = null;
 function connectToRelayServer() {
     try {
         // relayWs = new WebSocket('ws://localhost:8765');
-        relayWs = new WebSocket('wss://apresiasi-special-live-tools-production-de43.up.railway.app');
+        relayWs = new WebSocket('wss://apresiasi-special-live-tools-production-43ea.up.railway.app');
         
         relayWs.on('open', () => {
             console.log('✅ Connected to Relay Server (port 8765)');
