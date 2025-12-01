@@ -578,7 +578,7 @@ let wsApiReconnectTimer = null;
 function connectWebSocket() {
     try {
         // ws = new WebSocket('ws://localhost:8765');
-        ws = new WebSocket('ws://apresiasi-special-live-tools-production-de43.up.railway.app');
+        ws = new WebSocket('wss://apresiasi-special-live-tools-production-de43.up.railway.app');
         
         ws.onopen = () => {
             console.log('✅ Connected to relay server');
@@ -617,7 +617,7 @@ function connectWebSocket() {
 function connectApiWebSocket() {
     try {
         // wsApi = new WebSocket('ws://localhost:8766');
-        wsApi = new WebSocket('ws://apresiasi-special-live-tools-production-d117.up.railway.app');
+        wsApi = new WebSocket('wss://apresiasi-special-live-tools-production-d117.up.railway.app');
         
         wsApi.onopen = () => {
             console.log('✅ Connected to API server');

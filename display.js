@@ -256,7 +256,7 @@ let wsReconnectTimer = null;
 function connectWebSocket() {
     try {
         // ws = new WebSocket('ws://localhost:8765');
-        ws = new WebSocket('ws://apresiasi-special-live-tools-production-de43.up.railway.app');
+        ws = new WebSocket('wss://apresiasi-special-live-tools-production-de43.up.railway.app');
         
         ws.onopen = () => {
             console.log('✅ Display connected to relay server');
