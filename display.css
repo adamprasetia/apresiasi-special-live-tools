@@ -111,6 +111,10 @@ body {
     transform: translate(0, 0) scale(1);
 }
 
+.donation-alert.alert-bottom-left.adjust-for-ticker-bottom {
+    bottom: 15% !important;
+}
+
 .donation-alert.alert-bottom-right {
     top: auto;
     bottom: 5%;
@@ -121,6 +125,68 @@ body {
 
 .donation-alert.alert-bottom-right.show {
     transform: translate(0, 0) scale(1);
+}
+
+.donation-alert.alert-bottom-right.adjust-for-ticker-bottom {
+    bottom: 15% !important;
+}
+
+.donation-alert.alert-bottom {
+    top: auto;
+    bottom: 10%;
+    left: 50%;
+    transform: translate(-50%, 100%) scale(0);
+}
+
+.donation-alert.alert-bottom.show {
+    transform: translate(-50%, 0) scale(1);
+}
+
+.donation-alert.alert-bottom.adjust-for-ticker-bottom {
+    bottom: 18% !important;
+}
+
+.donation-alert.alert-top {
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -100%) scale(0);
+}
+
+.donation-alert.alert-top.show {
+    transform: translate(-50%, 0) scale(1);
+}
+
+.donation-alert.alert-top.adjust-for-ticker-top {
+    top: 18% !important;
+}
+
+.donation-alert.alert-top-left {
+    top: 5%;
+    left: 5%;
+    transform: translate(-100%, -100%) scale(0);
+}
+
+.donation-alert.alert-top-left.show {
+    transform: translate(0, 0) scale(1);
+}
+
+.donation-alert.alert-top-left.adjust-for-ticker-top {
+    top: 15% !important;
+}
+
+.donation-alert.alert-top-right {
+    top: 5%;
+    right: 5%;
+    left: auto;
+    transform: translate(100%, -100%) scale(0);
+}
+
+.donation-alert.alert-top-right.show {
+    transform: translate(0, 0) scale(1);
+}
+
+.donation-alert.alert-top-right.adjust-for-ticker-top {
+    top: 15% !important;
 }
 
 .donation-alert.show {
@@ -193,123 +259,122 @@ body {
     color: var(--text-secondary);
 }
 
-/* Recent Donations List */
+/* Recent Donations List - Ticker Style */
 .recent-donations {
     position: fixed;
-    top: 30px;
-    right: 30px;
-    background: var(--white);
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: var(--shadow-lg);
-    width: 400px;
-    max-height: 600px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 90, 169, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 8px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     display: none;
-    transform: translateX(100px);
-    transition: all 0.5s ease;
+    z-index: 1000;
+    margin: 0;
+}
+
+.recent-donations.top {
+    bottom: auto;
+    top: 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recent-donations.bottom {
+    bottom: 0;
+    top: auto;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .recent-donations.show {
     display: block;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateX(0);
-    animation: slideInRight 0.5s ease;
+    animation: slideInUp 0.5s ease;
 }
 
-.recent-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #e0e0e0;
+.ticker-wrapper {
+    width: 100%;
+    overflow: hidden;
 }
 
-.recent-logo {
-    height: 28px;
+.ticker-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
 }
 
-.recent-header h3 {
-    color: var(--primary-color);
-    font-size: 20px;
-    font-weight: 700;
+.ticker-content {
+    display: inline-flex;
+    gap: 40px;
+    animation: scroll-left 30s linear infinite;
+    white-space: nowrap;
 }
 
-.donations-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    max-height: 500px;
-    overflow-y: auto;
+@keyframes scroll-left {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
 }
 
-.donations-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.donations-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.donations-list::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 10px;
+.ticker-content:hover {
+    animation-play-state: paused;
 }
 
 .donation-item {
-    display: flex;
-    justify-content: space-between;
+    display: inline-flex;
     align-items: center;
-    padding: 12px 16px;
-    background: #f8f9fa;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    animation: slideIn 0.5s ease;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.donation-item:hover {
-    background: #e9ecef;
-    transform: translateX(-5px);
+    gap: 12px;
+    padding: 6px 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .item-left {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .item-name {
-    font-size: 16px;
+    color: var(--white);
     font-weight: 600;
-    color: var(--text-primary);
+    font-size: 14px;
+}
+
+.item-message {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    font-style: italic;
+    max-width: 400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .item-time {
-    font-size: 12px;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
 }
 
 .item-amount {
-    font-size: 16px;
+    color: var(--white);
     font-weight: 700;
-    color: var(--primary-color);
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 12px;
 }
 
-/* Total Counter */
+.donation-item:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.02);
+}
+
+/* Total Counter *//* Total Counter */
 .total-counter {
     position: fixed;
     bottom: 30px;
@@ -331,6 +396,17 @@ body {
     pointer-events: auto;
     transform: translateY(0);
     animation: slideInUp 0.5s ease;
+}
+
+/* Adjust position when ticker is at bottom */
+.total-counter.adjust-for-ticker-bottom {
+    bottom: 90px !important;
+}
+
+/* Adjust position when ticker is at top */
+.total-counter.adjust-for-ticker-top {
+    top: 90px !important;
+    bottom: auto !important;
 }
 
 .counter-content {
@@ -387,6 +463,17 @@ body {
     pointer-events: auto;
     transform: translateY(0);
     animation: slideInUp 0.5s ease;
+}
+
+/* Adjust position when ticker is at bottom */
+.qr-section.adjust-for-ticker-bottom {
+    bottom: 90px !important;
+}
+
+/* Adjust position when ticker is at top */
+.qr-section.adjust-for-ticker-top {
+    top: 90px !important;
+    bottom: auto !important;
 }
 
 .qr-content {
@@ -557,9 +644,19 @@ body {
     }
     
     .recent-donations {
-        width: 320px;
-        top: 20px;
-        right: 20px;
+        width: 100%;
+        left: 0;
+        bottom: 0;
+    }
+    
+    .recent-donations.top {
+        bottom: auto;
+        top: 0;
+    }
+    
+    .recent-donations.bottom {
+        bottom: 0;
+        top: auto;
     }
     
     .total-counter {

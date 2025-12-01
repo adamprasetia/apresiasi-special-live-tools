@@ -41,7 +41,7 @@ function getRelativeTime(timestamp) {
 
 // Position tracking
 let elementPositions = {
-    recentDonations: 'top-right',
+    recentDonations: 'bottom',
     totalCounter: 'bottom-left',
     qrSection: 'bottom-right'
 };
@@ -52,13 +52,70 @@ function changeElementPosition(elementId, position) {
     if (!element) return;
     
     // Remove all position classes
-    element.classList.remove('top-right', 'top-left', 'bottom-right', 'bottom-left');
+    element.classList.remove('top-right', 'top-left', 'bottom-right', 'bottom-left', 'top', 'bottom');
+    element.classList.remove('adjust-for-ticker-bottom', 'adjust-for-ticker-top');
     
     // Add new position class
     element.classList.add(position);
     
     // Store position
     elementPositions[elementId] = position;
+    
+    // Adjust other elements if ticker position changes
+    adjustElementsForTicker();
+}
+
+// Adjust total counter and QR section position based on ticker position
+function adjustElementsForTicker() {
+    const recentDonations = document.getElementById('recentDonations');
+    const totalCounter = document.getElementById('totalCounter');
+    const qrSection = document.getElementById('qrSection');
+    const donationAlert = document.getElementById('donationAlert');
+    
+    const tickerPosition = elementPositions.recentDonations;
+    const totalCounterPosition = elementPositions.totalCounter;
+    const qrPosition = elementPositions.qrSection;
+    const isTickerVisible = recentDonations && recentDonations.classList.contains('show');
+    
+    // Remove existing adjustment classes
+    if (totalCounter) {
+        totalCounter.classList.remove('adjust-for-ticker-bottom', 'adjust-for-ticker-top');
+    }
+    if (qrSection) {
+        qrSection.classList.remove('adjust-for-ticker-bottom', 'adjust-for-ticker-top');
+    }
+    if (donationAlert) {
+        donationAlert.classList.remove('adjust-for-ticker-bottom', 'adjust-for-ticker-top');
+    }
+    
+    // Add adjustment classes if ticker is visible
+    if (isTickerVisible) {
+        if (tickerPosition === 'bottom') {
+            // Only adjust if element is at bottom position
+            if (totalCounter && (totalCounterPosition === 'bottom-left' || totalCounterPosition === 'bottom-right')) {
+                totalCounter.classList.add('adjust-for-ticker-bottom');
+            }
+            if (qrSection && (qrPosition === 'bottom-left' || qrPosition === 'bottom-right')) {
+                qrSection.classList.add('adjust-for-ticker-bottom');
+            }
+            // Adjust alert if it's at bottom
+            if (donationAlert && (alertPosition === 'bottom' || alertPosition === 'bottom-left' || alertPosition === 'bottom-right')) {
+                donationAlert.classList.add('adjust-for-ticker-bottom');
+            }
+        } else if (tickerPosition === 'top') {
+            // Only adjust if element is at top position
+            if (totalCounter && (totalCounterPosition === 'top-left' || totalCounterPosition === 'top-right')) {
+                totalCounter.classList.add('adjust-for-ticker-top');
+            }
+            if (qrSection && (qrPosition === 'top-left' || qrPosition === 'top-right')) {
+                qrSection.classList.add('adjust-for-ticker-top');
+            }
+            // Adjust alert if it's at top
+            if (donationAlert && (alertPosition === 'top' || alertPosition === 'top-left' || alertPosition === 'top-right')) {
+                donationAlert.classList.add('adjust-for-ticker-top');
+            }
+        }
+    }
 }
 
 // Format Rupiah
@@ -86,7 +143,11 @@ function showDonationAlert(donation, customDuration) {
     
     // Apply position class
     donationAlert.classList.remove('alert-center', 'alert-top', 'alert-bottom', 'alert-top-left', 'alert-top-right', 'alert-bottom-left', 'alert-bottom-right');
+    donationAlert.classList.remove('adjust-for-ticker-bottom', 'adjust-for-ticker-top');
     donationAlert.classList.add(`alert-${alertPosition}`);
+    
+    // Adjust position based on ticker
+    adjustAlertForTicker();
     
     // Show alert
     donationAlert.classList.add('show');
@@ -112,6 +173,26 @@ function showDonationAlert(donation, customDuration) {
     }, duration);
 }
 
+// Adjust alert position based on ticker
+function adjustAlertForTicker() {
+    const recentDonations = document.getElementById('recentDonations');
+    const tickerPosition = elementPositions.recentDonations;
+    const isTickerVisible = recentDonations && recentDonations.classList.contains('show');
+    
+    if (!isTickerVisible) return;
+    
+    // Check if alert position conflicts with ticker
+    if (tickerPosition === 'bottom') {
+        if (alertPosition === 'bottom' || alertPosition === 'bottom-left' || alertPosition === 'bottom-right') {
+            donationAlert.classList.add('adjust-for-ticker-bottom');
+        }
+    } else if (tickerPosition === 'top') {
+        if (alertPosition === 'top' || alertPosition === 'top-left' || alertPosition === 'top-right') {
+            donationAlert.classList.add('adjust-for-ticker-top');
+        }
+    }
+}
+
 // Add alert to queue
 function addToAlertQueue(donation, customDuration) {
     alertQueue.push({ donation, customDuration });
@@ -134,20 +215,21 @@ function processAlertQueue() {
 
 // Update recent donations list
 function updateRecentDonations() {
-    donationsList.innerHTML = '';
+    const recent5 = donations.slice(0, 5);
     
-    donations.slice(0, 5).forEach(donation => {
-        const item = document.createElement('div');
-        item.className = 'donation-item';
-        item.innerHTML = `
+    // Duplicate items for seamless loop
+    const duplicatedItems = [...recent5, ...recent5];
+    
+    donationsList.innerHTML = duplicatedItems.map(donation => `
+        <div class="donation-item">
             <div class="item-left">
                 <span class="item-name">${donation.name}</span>
+                ${donation.message ? `<span class="item-message">${donation.message}</span>` : ''}
                 <span class="item-time">${getRelativeTime(donation.timestamp)}</span>
             </div>
             <div class="item-amount">${formatRupiah(donation.amount)}</div>
-        `;
-        donationsList.appendChild(item);
-    });
+        </div>
+    `).join('');
 }
 
 // Add new donation
@@ -403,6 +485,8 @@ function handleDisplayCommand(data) {
             } else {
                 element.classList.remove('show');
             }
+            // Adjust positions after toggling visibility
+            adjustElementsForTicker();
         }
     }
     
