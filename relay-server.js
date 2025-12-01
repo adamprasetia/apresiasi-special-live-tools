@@ -17,14 +17,28 @@ const server = http.createServer((req, res) => {
         return;
     }
     
+    // Health check endpoint
+    if (req.url === '/health' && req.method === 'GET') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            status: 'ok',
+            service: 'Apresiasi Relay Server',
+            dashboards: dashboardClients.size,
+            displays: displayClients.size,
+            timestamp: new Date().toISOString()
+        }));
+        return;
+    }
+    
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Apresiasi Relay Server Running\n');
+    res.end('Apresiasi Relay Server Running\nWebSocket: ws://localhost:8765\nHealth: http://localhost:8765/health\n');
 });
 
 const wss = new WebSocket.Server({ server });
 
 let dashboardClients = new Set();
 let displayClients = new Set();
+let apiClients = new Set();
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
@@ -58,6 +72,17 @@ wss.on('connection', (ws) => {
                         }
                     });
                 }
+            } else if (data.clientType === 'api') {
+                apiClients.add(ws);
+                console.log('API Server connected. Total API servers:', apiClients.size);
+            } else if (data.type === 'API_DONATION') {
+                // Broadcast donation from API to all dashboards
+                console.log('📬 Received donation from API, broadcasting to dashboards...');
+                dashboardClients.forEach(client => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify(data));
+                    }
+                });
             }
         } catch (e) {
             console.error('Failed to parse message:', e);
@@ -67,7 +92,8 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         dashboardClients.delete(ws);
         displayClients.delete(ws);
-        console.log('Client disconnected. Dashboards:', dashboardClients.size, 'Displays:', displayClients.size);
+        apiClients.delete(ws);
+        console.log('Client disconnected. Dashboards:', dashboardClients.size, 'Displays:', displayClients.size, 'APIs:', apiClients.size);
     });
     
     ws.on('error', (error) => {
@@ -77,6 +103,12 @@ wss.on('connection', (ws) => {
 
 const PORT = 8765;
 server.listen(PORT, () => {
-    console.log(`Apresiasi Relay Server running on http://localhost:${PORT}`);
-    console.log('WebSocket server running on ws://localhost:${PORT}');
+    console.log('╔════════════════════════════════════════════╗');
+    console.log('║   Apresiasi Relay Server                   ║');
+    console.log('╚════════════════════════════════════════════╝');
+    console.log(`🚀 HTTP Server: http://localhost:${PORT}`);
+    console.log(`🔌 WebSocket Server: ws://localhost:${PORT}`);
+    console.log(`❤️  Health Check: http://localhost:${PORT}/health`);
+    console.log('');
+    console.log('Waiting for connections...\n');
 });

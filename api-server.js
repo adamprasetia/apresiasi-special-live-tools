@@ -10,41 +10,50 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Store connected dashboard clients
-let dashboardClients = new Set();
+// WebSocket client to relay server
+let relayWs = null;
+let relayReconnectTimer = null;
 
-// WebSocket server for real-time updates to dashboard
-const wss = new WebSocket.Server({ port: 8766 });
+function connectToRelayServer() {
+    try {
+        relayWs = new WebSocket('ws://localhost:8765');
+        
+        relayWs.on('open', () => {
+            console.log('✅ Connected to Relay Server (port 8765)');
+            // Identify as API server
+            relayWs.send(JSON.stringify({ clientType: 'api' }));
+        });
+        
+        relayWs.on('close', () => {
+            console.log('❌ Disconnected from Relay Server');
+            relayWs = null;
+            // Try to reconnect after 5 seconds
+            if (relayReconnectTimer) clearTimeout(relayReconnectTimer);
+            relayReconnectTimer = setTimeout(connectToRelayServer, 5000);
+        });
+        
+        relayWs.on('error', (error) => {
+            console.warn('⚠️  Relay Server not available (will retry)');
+        });
+    } catch (e) {
+        console.warn('Failed to connect to Relay Server:', e);
+    }
+}
 
-wss.on('connection', (ws) => {
-    console.log('✅ Dashboard connected to API server');
-    dashboardClients.add(ws);
-    
-    ws.on('close', () => {
-        console.log('❌ Dashboard disconnected from API server');
-        dashboardClients.delete(ws);
-    });
-    
-    ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-        dashboardClients.delete(ws);
-    });
-});
+// Connect to relay server on startup
+connectToRelayServer();
 
-// Broadcast donation to all connected dashboards
-function broadcastToDashboards(donation) {
-    const message = JSON.stringify({
-        type: 'API_DONATION',
-        donation: donation
-    });
-    
-    dashboardClients.forEach(client => {
-        if (client.readyState === WebSocket.OPEN) {
-            client.send(message);
-        }
-    });
-    
-    console.log(`📢 Broadcast to ${dashboardClients.size} dashboard(s)`);
+// Function to send donation to relay server
+function sendToRelayServer(donation) {
+    if (relayWs && relayWs.readyState === WebSocket.OPEN) {
+        relayWs.send(JSON.stringify({
+            type: 'API_DONATION',
+            donation: donation
+        }));
+        console.log('📤 Sent to relay server');
+    } else {
+        console.warn('⚠️  Relay server not connected, donation not broadcasted');
+    }
 }
 
 // Health check endpoint
@@ -52,7 +61,6 @@ app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
         message: 'Apresiasi API Server is running',
-        connectedDashboards: dashboardClients.size,
         timestamp: new Date().toISOString()
     });
 });
@@ -88,10 +96,9 @@ app.post('/api/donations', (req, res) => {
             source: 'api'
         };
         
-        // Broadcast to connected dashboards
-        broadcastToDashboards(donation);
+        // Send to relay server (will broadcast to all dashboards)
+        sendToRelayServer(donation);
         
-        // Log
         console.log('💰 New donation received:', {
             name: donation.hideName ? 'Anonim' : donation.name,
             amount: `Rp ${donation.amount.toLocaleString('id-ID')}`,
@@ -152,11 +159,11 @@ app.listen(PORT, () => {
     console.log('║   Apresiasi API Server                     ║');
     console.log('╚════════════════════════════════════════════╝');
     console.log(`🚀 HTTP Server: http://localhost:${PORT}`);
-    console.log(`🔌 WebSocket Server: ws://localhost:8766`);
     console.log('');
     console.log('Available Endpoints:');
     console.log(`  GET  http://localhost:${PORT}/health`);
     console.log(`  POST http://localhost:${PORT}/api/donations`);
     console.log('');
+    console.log('Note: WebSocket relay available at ws://localhost:8765');
     console.log('Waiting for donations...\n');
 });

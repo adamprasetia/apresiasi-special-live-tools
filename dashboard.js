@@ -571,14 +571,10 @@ const STORAGE_TIMESTAMP_KEY = 'apresiasi_display_timestamp';
 let ws = null;
 let wsReconnectTimer = null;
 
-// WebSocket connection for API server
-let wsApi = null;
-let wsApiReconnectTimer = null;
-
 function connectWebSocket() {
     try {
-        // ws = new WebSocket('ws://localhost:8765');
-        ws = new WebSocket('wss://apresiasi-special-live-tools-production-de43.up.railway.app');
+        ws = new WebSocket('ws://localhost:8765');
+        // ws = new WebSocket('wss://apresiasi-special-live-tools-production-de43.up.railway.app');
         
         ws.onopen = () => {
             console.log('✅ Connected to relay server');
@@ -589,9 +585,15 @@ function connectWebSocket() {
         ws.onmessage = (event) => {
             try {
                 const data = JSON.parse(event.data);
+                
                 // Handle status updates from display
                 if (data.type === 'QUEUE_STATUS') {
                     updateAlertQueueDisplay(data);
+                }
+                
+                // Handle donations from API server
+                if (data.type === 'API_DONATION') {
+                    handleApiDonation(data.donation);
                 }
             } catch (e) {
                 console.error('Failed to parse WebSocket message:', e);
@@ -614,43 +616,7 @@ function connectWebSocket() {
     }
 }
 
-function connectApiWebSocket() {
-    try {
-        // wsApi = new WebSocket('ws://localhost:8766');
-        wsApi = new WebSocket('wss://apresiasi-special-live-tools-production-d117.up.railway.app');
-        
-        wsApi.onopen = () => {
-            console.log('✅ Connected to API server');
-        };
-        
-        wsApi.onmessage = (event) => {
-            try {
-                const data = JSON.parse(event.data);
-                // Handle donations from API
-                if (data.type === 'API_DONATION') {
-                    handleApiDonation(data.donation);
-                }
-            } catch (e) {
-                console.error('Failed to parse API message:', e);
-            }
-        };
-        
-        wsApi.onerror = (error) => {
-            console.warn('API WebSocket error (API server not running?)');
-        };
-        
-        wsApi.onclose = () => {
-            console.log('❌ Disconnected from API server');
-            wsApi = null;
-            // Try to reconnect after 5 seconds
-            if (wsApiReconnectTimer) clearTimeout(wsApiReconnectTimer);
-            wsApiReconnectTimer = setTimeout(connectApiWebSocket, 5000);
-        };
-    } catch (e) {
-        console.warn('API WebSocket not available:', e);
-    }
-}
-
+// Handle donation from API server (via relay server)
 function handleApiDonation(donation) {
     console.log('📬 Received donation from API:', donation);
     
@@ -688,7 +654,7 @@ function handleApiDonation(donation) {
 
 // Connect to WebSocket servers on load
 connectWebSocket();
-connectApiWebSocket();
+// Note: API donations will come through form submission, not WebSocket
 
 // Send message to display window
 function sendToDisplay(message) {
