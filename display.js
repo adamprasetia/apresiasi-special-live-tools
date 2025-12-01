@@ -195,7 +195,8 @@ function addDonationQuiet(donation) {
 window.addEventListener('load', () => {
     // Generate QR Code
     new QRCode(qrCode, {
-        text: 'https://apresiasi.kompas.com',
+        // text: 'https://apresiasi.kompas.com',
+        text: 'https://adamprasetia.github.io/apresiasi-special-live-tools/',
         width: 120,
         height: 120,
         colorDark: '#005AA9',
