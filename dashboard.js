@@ -73,6 +73,7 @@ const alertPosition = document.getElementById('alertPosition');
 // Preview controls
 const displayPreview = document.getElementById('displayPreview');
 const refreshPreview = document.getElementById('refreshPreview');
+const copyDisplayLink = document.getElementById('copyDisplayLink');
 const openNewWindow = document.getElementById('openNewWindow');
 
 // Other controls
@@ -902,6 +903,32 @@ testAlertBtn.addEventListener('click', () => {
 // Refresh Preview
 refreshPreview.addEventListener('click', () => {
     displayPreview.src = `display.html?campaign=${campaign}`;
+});
+
+// Copy Display Link
+copyDisplayLink.addEventListener('click', () => {
+    const fullUrl = `${window.location.origin}${window.location.pathname.replace('dashboard.html', 'display.html')}?campaign=${campaign}`;
+    
+    navigator.clipboard.writeText(fullUrl).then(() => {
+        // Show success feedback
+        const originalText = copyDisplayLink.innerHTML;
+        copyDisplayLink.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Copied!
+        `;
+        copyDisplayLink.classList.add('btn-success');
+        copyDisplayLink.classList.remove('btn-outline');
+        
+        setTimeout(() => {
+            copyDisplayLink.innerHTML = originalText;
+            copyDisplayLink.classList.remove('btn-success');
+            copyDisplayLink.classList.add('btn-outline');
+        }, 2000);
+    }).catch(err => {
+        alert('Gagal copy link: ' + err);
+    });
 });
 
 // Open in New Window

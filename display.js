@@ -207,6 +207,12 @@ window.addEventListener('load', () => {
         correctLevel: QRCode.CorrectLevel.H
     });
     
+    // Update QR URL text
+    const qrUrlElement = document.querySelector('.qr-url');
+    if (qrUrlElement) {
+        qrUrlElement.textContent = qrUrl;
+    }
+    
     // Elements are hidden by default, controlled by dashboard
 });
 
