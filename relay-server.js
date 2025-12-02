@@ -53,6 +53,39 @@ const wss = new WebSocket.Server({ server });
 let dashboardClients = new Map(); // ws -> { campaign: string }
 let displayClients = new Map();   // ws -> { campaign: string }
 let apiClients = new Set();
+// Track a primary dashboard per campaign (first one connected becomes primary)
+let primaryByCampaign = new Map(); // campaign -> ws
+
+function sendJson(ws, obj) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(obj));
+    }
+}
+
+function notifyPrimaryStatus(campaign) {
+    const primary = primaryByCampaign.get(campaign) || null;
+    dashboardClients.forEach((info, client) => {
+        if (info.campaign === campaign) {
+            sendJson(client, { type: 'PRIMARY_STATUS', campaign, primary: client === primary });
+        }
+    });
+}
+
+function promoteNewPrimary(campaign) {
+    let newPrimary = null;
+    for (const [client, info] of dashboardClients.entries()) {
+        if (info.campaign === campaign && client.readyState === WebSocket.OPEN) {
+            newPrimary = client;
+            break;
+        }
+    }
+    if (newPrimary) {
+        primaryByCampaign.set(campaign, newPrimary);
+    } else {
+        primaryByCampaign.delete(campaign);
+    }
+    notifyPrimaryStatus(campaign);
+}
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
@@ -65,6 +98,10 @@ wss.on('connection', (ws) => {
             if (data.clientType === 'dashboard') {
                 const campaign = data.campaign || 'default';
                 dashboardClients.set(ws, { campaign });
+                if (!primaryByCampaign.has(campaign)) {
+                    primaryByCampaign.set(campaign, ws);
+                }
+                notifyPrimaryStatus(campaign);
                 console.log(`Dashboard connected to campaign: ${campaign}. Total dashboards:`, dashboardClients.size);
                 
                 // Relay command to displays in the same campaign
@@ -72,6 +109,15 @@ wss.on('connection', (ws) => {
                     displayClients.forEach((clientInfo, client) => {
                         if (clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
                             client.send(JSON.stringify(data.command));
+                        }
+                    });
+                }
+
+                // Relay dashboard sync to other dashboards in the same campaign
+                if (data.dashboardSync) {
+                    dashboardClients.forEach((clientInfo, client) => {
+                        if (client !== ws && clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
+                            client.send(JSON.stringify({ type: 'DASHBOARD_SYNC', payload: data.dashboardSync }));
                         }
                     });
                 }
@@ -92,14 +138,27 @@ wss.on('connection', (ws) => {
                 apiClients.add(ws);
                 console.log('API Server connected. Total API servers:', apiClients.size);
             } else if (data.type === 'API_DONATION') {
-                // Broadcast donation from API to dashboards in specific campaign
+                // Forward donation from API only to the primary dashboard for the campaign
                 const campaign = data.campaign || 'default';
-                console.log(`📬 Received donation from API for campaign: ${campaign}, broadcasting to dashboards...`);
-                dashboardClients.forEach((clientInfo, client) => {
-                    if (clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
-                        client.send(JSON.stringify(data));
+                const primary = primaryByCampaign.get(campaign);
+                if (primary && primary.readyState === WebSocket.OPEN) {
+                    console.log(`📬 API donation for ${campaign} -> primary only`);
+                    sendJson(primary, data);
+                } else {
+                    console.log(`📬 API donation for ${campaign} but no primary; attempting to promote and deliver`);
+                    promoteNewPrimary(campaign);
+                    const retryPrimary = primaryByCampaign.get(campaign);
+                    if (retryPrimary && retryPrimary.readyState === WebSocket.OPEN) {
+                        sendJson(retryPrimary, data);
+                    } else {
+                        // Fallback: broadcast to all dashboards if still no primary
+                        dashboardClients.forEach((clientInfo, client) => {
+                            if (clientInfo.campaign === campaign && client.readyState === WebSocket.OPEN) {
+                                sendJson(client, data);
+                            }
+                        });
                     }
-                });
+                }
             }
         } catch (e) {
             console.error('Failed to parse message:', e);
@@ -107,7 +166,19 @@ wss.on('connection', (ws) => {
     });
     
     ws.on('close', () => {
-        dashboardClients.delete(ws);
+        const info = dashboardClients.get(ws);
+        if (info) {
+            const campaign = info.campaign;
+            dashboardClients.delete(ws);
+            if (primaryByCampaign.get(campaign) === ws) {
+                promoteNewPrimary(campaign);
+            } else {
+                // Still notify others in campaign of status (not strictly necessary)
+                notifyPrimaryStatus(campaign);
+            }
+        } else {
+            dashboardClients.delete(ws);
+        }
         displayClients.delete(ws);
         apiClients.delete(ws);
         console.log('Client disconnected. Dashboards:', dashboardClients.size, 'Displays:', displayClients.size, 'APIs:', apiClients.size);
